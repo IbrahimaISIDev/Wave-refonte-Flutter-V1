@@ -1,0 +1,50 @@
+name: wave_app
+description: "Application de transfert d'argent Wave..."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  dio: ^5.0.0  # Pour les requêtes HTTP
+  flutter_bloc: ^8.1.0
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  image_picker: ^1.0.7  # Pour la sélection d'images
+  intl: ^0.18.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^3.5.2
+  google_fonts: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.10.0 # Pour les icônes de l'application
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/ISD_ODC.jpeg" # Chemin vers l'icône personnalisée
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/ISD_ODC.jpeg
+    - assets/images/logo_wave.png
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700

@@ -1,0 +1,17 @@
+wave_app/
+├── android/           # Configuration Android native
+├── ios/              # Configuration iOS native
+├── lib/              # Code source Flutter
+│   ├── config/       # Configuration de l'application
+│   ├── core/         # Logique métier centrale
+│   ├── data/         # Couche données
+│   │   ├── models/   # Modèles de données
+│   │   ├── repositories/ # Repositories
+│   │   └── services/ # Services API
+│   ├── presentation/ # Interface utilisateur
+│   │   ├── screens/  # Écrans de l'application
+│   │   ├── widgets/  # Widgets réutilisables
+│   │   └── theme/    # Thème de l'application
+│   ├── utils/        # Utilitaires
+│   └── main.dart     # Point d'entrée
+└── test/             # Tests unitaires et d'intégration
