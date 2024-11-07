@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -28,17 +28,25 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: Colors.grey[600]), // Nouvelle couleur de texte
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-        prefixIcon: Icon(prefixIcon, color: Colors.white70),
+        hintStyle: const TextStyle(color: Colors.grey), // Nouvelle couleur de hint
+        prefixIcon: Icon(prefixIcon, color: Theme.of(context).primaryColor), // Nouvelle couleur d'icône
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: Colors.grey[100], // Nouveau fond
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.8)), // Nouvelle bordure
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Colors.grey[300]!), // Nouvelle bordure inactive
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Theme.of(context).primaryColor), // Nouvelle bordure active
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 24,
@@ -52,9 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      // Ajoutez ici la logique de connexion
       Future.delayed(const Duration(seconds: 2), () {
         setState(() => _isLoading = false);
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/home');
       });
     }
@@ -75,7 +83,10 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue.shade400, Colors.blue.shade800],
+            colors: [
+              Colors.white, // Fond blanc
+              Colors.grey[100]!, // Fond gris clair
+            ],
           ),
         ),
         child: SafeArea(
@@ -88,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                        icon: Icon(Icons.arrow_back_ios, 
+                          color: Theme.of(context).primaryColor), // Nouvelle couleur de l'icône
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -99,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Hero(
                     tag: 'logo',
                     child: Image.asset(
-                      'assets/images/logo_wave.png',
+                      'assets/images/samaxaalis.jpeg',
                       width: 100,
                       height: 100,
                     ),
@@ -110,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Ravi de vous revoir !',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
+                      color: Colors.grey[600], // Nouvelle couleur de texte
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -148,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                              color: Colors.white70,
+                              color: Theme.of(context).primaryColor, // Nouvelle couleur d'icône
                             ),
                             onPressed: () {
                               setState(() {
@@ -174,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               'Mot de passe oublié ?',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Theme.of(context).primaryColor, // Nouvelle couleur du lien
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -189,21 +201,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue.shade800,
+                              backgroundColor: Theme.of(context).primaryColor, // Nouvelle couleur de fond
+                              foregroundColor: Colors.white, // Nouvelle couleur de texte
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
-                              elevation: 0,
+                              elevation: 2,
+                              shadowColor: Colors.black.withOpacity(0.1), // Nouvelle couleur d'ombre
                             ),
                             child: _isLoading
-                                ? SizedBox(
+                                ? const SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.blue.shade800,
+                                        Colors.white,
                                       ),
                                     ),
                                   )

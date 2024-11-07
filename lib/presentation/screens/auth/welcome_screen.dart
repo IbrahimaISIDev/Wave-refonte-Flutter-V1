@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
-
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +16,8 @@ class WelcomeScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.blue.shade400,
-              Colors.blue.shade800,
+              Theme.of(context).primaryColor,
+              Theme.of(context).primaryColor.withOpacity(0.8),
             ],
           ),
         ),
@@ -28,25 +27,39 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo animé
+                // Logo animé sans effet de rotation, avec bords arrondis
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 1200),
                   builder: (context, double value, child) {
                     return Transform.scale(
-                      scale: value,
+                      scale: value, // Animation de mise à l'échelle
                       child: Hero(
                         tag: 'logo',
-                        child: Image.asset(
-                          'assets/images/logo_wave.png',
-                          width: 180,
-                          height: 180,
+                        child: ClipOval(  // Arrondir les bords du logo
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blueAccent.withOpacity(0.5),
+                                  blurRadius: 10.0,
+                                  spreadRadius: 2.0,
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/samaxaalis.jpeg',
+                              width: 200,
+                              height: 200,
+                              fit: BoxFit.cover,  // Assure que l'image couvre bien l'espace arrondi
+                            ),
+                          ),
                         ),
                       ),
                     );
                   },
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 25),
                 
                 // Texte de bienvenue avec animation
                 TweenAnimationBuilder(
@@ -100,7 +113,7 @@ class WelcomeScreen extends StatelessWidget {
                         onPressed: () => Navigator.pushNamed(context, '/login'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: Colors.blue.shade800,
+                          foregroundColor: Theme.of(context).primaryColor,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 48,
                             vertical: 16,
@@ -108,7 +121,8 @@ class WelcomeScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          elevation: 0,
+                          elevation: 2,
+                          shadowColor: Colors.black.withOpacity(0.1),
                         ),
                         child: const Text(
                           'Se connecter',
@@ -122,7 +136,7 @@ class WelcomeScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () => Navigator.pushNamed(context, '/register'),
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
+                          foregroundColor: Colors.white.withOpacity(0.9),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 48,
                             vertical: 16,

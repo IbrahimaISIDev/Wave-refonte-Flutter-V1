@@ -10,7 +10,7 @@ import 'package:wave_app/presentation/screens/transfer/transfer_history_screen.d
 import 'package:wave_app/presentation/screens/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -59,6 +59,35 @@ class _HomeScreenState extends State<HomeScreen>
       date: DateTime.now().subtract(const Duration(hours: 2)),
       status: TransactionStatus.completed,
     ),
+    Transaction(
+      type: TransactionType.received,
+      amount: 100000,
+      recipient: "John Doe",
+      date: DateTime.now().subtract(const Duration(hours: 1)),
+      status: TransactionStatus.pending,
+    ),
+    Transaction(
+      type: TransactionType.sent,
+      amount: 20000,
+      recipient: "Jane Smith",
+      date: DateTime.now().subtract(const Duration(hours: 3)),
+      status: TransactionStatus.completed,
+    ),
+    Transaction(
+      type: TransactionType.received,
+      amount: 75000,
+      recipient: "Emma Watson",
+      date: DateTime.now().subtract(const Duration(hours: 4)),
+      status: TransactionStatus.pending,
+    ),
+    Transaction(
+      type: TransactionType.sent,
+      amount: 15000,
+      recipient: "David Johnson",
+      date: DateTime.now().subtract(const Duration(hours: 5)),
+      status: TransactionStatus.completed,
+    ),
+    
   ];
 
   @override

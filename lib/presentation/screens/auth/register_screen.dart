@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -44,6 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erreur lors de la sélection de l\'image')),
       );
@@ -72,22 +73,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text('Choisir une photo de profil'),
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+          title: const Text('Choisir une photo de profil', style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Prendre une photo'),
+                leading: const Icon(Icons.camera_alt, color: Colors.white),
+                title: const Text('Prendre une photo', style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choisir depuis la galerie'),
+                leading: const Icon(Icons.photo_library, color: Colors.white),
+                title: const Text('Choisir depuis la galerie', style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -108,7 +109,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.blue.shade400, Colors.blue.shade800],
+            colors: [
+              Theme.of(context).primaryColor,
+              Theme.of(context).primaryColor.withOpacity(0.8),
+            ],
           ),
         ),
         child: SafeArea(
@@ -164,7 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             radius: 20,
                             child: IconButton(
                               icon: Icon(Icons.camera_alt, 
-                                color: Colors.blue.shade800,
+                                color: Theme.of(context).primaryColor,
                                 size: 20,
                               ),
                               onPressed: _showImageSourceDialog,
@@ -219,10 +223,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: DropdownButton<String>(
                               isExpanded: true,
                               value: _selectedGender,
-                              dropdownColor: Colors.blue.shade800,
+                              dropdownColor: Theme.of(context).primaryColor.withOpacity(0.8),
                               style: const TextStyle(color: Colors.white),
                               icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                              items: ['Non spécifié', 'Homme', 'Femme', 'Autre']
+                              items: ['Non spécifié', 'Homme', 'Femme']
                                   .map((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
@@ -324,10 +328,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _acceptTerms = value ?? false;
                                 });
                               },
-                              fillColor: MaterialStateProperty.resolveWith(
+                              fillColor: WidgetStateProperty.resolveWith(
                                 (states) => Colors.white,
                               ),
-                              checkColor: Colors.blue.shade800,
+                              checkColor: Theme.of(context).primaryColor,
                             ),
                             Expanded(
                               child: Text(
@@ -351,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 : _handleRegister,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue.shade800,
+                              foregroundColor: Theme.of(context).primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -364,7 +368,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.blue.shade800,
+                                        Theme.of(context).primaryColor,
                                       ),
                                     ),
                                   )
