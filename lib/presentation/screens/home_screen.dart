@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/data/models/transaction.dart';
 import 'package:wave_app/presentation/screens/transfer/transfer_history_screen.dart';
 import 'package:wave_app/presentation/screens/profile/profile_screen.dart';
+import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen>
   late TabController _tabController;
   bool _isBalanceVisible = true;
   final MobileScannerController _scannerController = MobileScannerController();
-  bool _isScanning = false;
 
   int _selectedIndex = 0; // Ajout de l'index sélectionné pour la navigation
 
@@ -234,93 +231,118 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
-              ],
-            ),
+Widget _buildAppBar() {
+  return SliverAppBar(
+    expandedHeight: 200,
+    pinned: true,
+    backgroundColor: Colors.transparent,
+    flexibleSpace: FlexibleSpaceBar(
+      background: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.9),
+              Theme.of(context).primaryColor.withOpacity(0.6),
+            ],
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: _buildUserInfo(),
-            ),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(20),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserInfo() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bonjour, Amadou',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () =>
-                  setState(() => _isBalanceVisible = !_isBalanceVisible),
-              child: _buildBalanceDisplay(),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
-        _buildProfileButton(),
-      ],
-    );
-  }
-
-  Widget _buildBalanceDisplay() {
-    return Row(
-      children: [
-        Text(
-          _isBalanceVisible
-              ? currencyFormat.format(balance)
-              : '• • • • • • •  •',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: _buildUserInfo(),
           ),
         ),
-        const SizedBox(width: 8),
-        Icon(
-          _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-          color: Colors.white,
-          size: 20,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileButton() {
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: Colors.white.withOpacity(0.2),
-      child: IconButton(
-        icon: const Icon(Icons.person, color: Colors.white),
-        onPressed: () {},
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildUserInfo() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            'Bonjour, Amadou',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.95),
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 15),
+          GestureDetector(
+            onTap: () => setState(() => _isBalanceVisible = !_isBalanceVisible),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: _buildBalanceDisplay(),
+            ),
+          ),
+        ],
+      ),
+      _buildProfileButton(),
+    ],
+  );
+}
+
+Widget _buildBalanceDisplay() {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        _isBalanceVisible
+            ? currencyFormat.format(balance)
+            : '• • • • • • • • • •',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      const SizedBox(width: 8),
+      Icon(
+        _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+        color: Colors.white.withOpacity(0.8),
+        size: 20,
+      ),
+    ],
+  );
+}
+
+Widget _buildProfileButton() {
+  return Material(
+    color: Colors.transparent,
+    shape: const CircleBorder(),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () {},
+      child: CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.white.withOpacity(0.2),
+        child: const Icon(Icons.person, color: Colors.white, size: 24),
+      ),
+    ),
+  );
+}
+
 
   Widget _buildActionButtons() {
     return SliverToBoxAdapter(
@@ -402,25 +424,57 @@ class _HomeScreenState extends State<HomeScreen>
               icon: Icons.send,
               label: 'Envoyer',
               color: Theme.of(context).primaryColor,
-              onTap: () {},
+              onTap: () {
+                // Naviguez vers la page de transfert
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransferScreen(),
+                  ),
+                );
+              },
             ),
             _buildQuickActionButton(
               icon: Icons.account_balance_wallet,
               label: 'Recharger',
               color: Colors.green,
-              onTap: () {},
+              onTap: () {
+                // // Naviguez vers la page de rechargement
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const RechargeScreen(),
+                //   ),
+                // );
+              },
             ),
             _buildQuickActionButton(
               icon: Icons.receipt_long,
               label: 'Factures',
               color: Colors.orange,
-              onTap: () {},
+              onTap: () {
+                // // Naviguez vers la page des factures
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const InvoiceScreen(),
+                //   ),
+                // );
+              },
             ),
             _buildQuickActionButton(
               icon: Icons.more_horiz,
               label: 'Plus',
               color: Colors.purple,
-              onTap: () {},
+              onTap: () {
+                // // Naviguez vers la page des paramètres
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const SettingsScreen(),
+                //   ),
+                // );
+              },
             ),
           ],
         ),
@@ -428,54 +482,76 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildQuickActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+Widget _buildQuickActionButton({
+  required IconData icon,
+  required String label,
+  required Color color,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: () {
+      if (label == 'Envoyer') {
+        // Naviguez vers la page de transfert
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const TransferScreen(),
+          ),
+        );
+      } else {
+        onTap();
+      }
+    },
+    borderRadius: BorderRadius.circular(12),
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildTabs() {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 30, 20, 0),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(16),
+  return SliverToBoxAdapter(
+    child: Container(
+      margin: const EdgeInsets.fromLTRB(20, 30, 20, 0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12.withOpacity(0.1), // Ombre légère pour profondeur
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: DefaultTabController(
+          length: 2,
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
+              color: Theme.of(context).primaryColor, // Couleur dynamique de l’indicateur
               borderRadius: BorderRadius.circular(16),
-              color: Theme.of(context).primaryColor,
             ),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.grey[600],
@@ -483,27 +559,68 @@ class _HomeScreenState extends State<HomeScreen>
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
-            tabs: const [
-              Tab(text: 'Transactions'),
-              Tab(text: 'Favoris'),
+            isScrollable: true,
+            indicatorSize: TabBarIndicatorSize.tab,
+            tabs: [
+              _buildTab("Transactions", Icons.swap_horiz, 5), // Badge pour Transactions
+              _buildTab("Favoris", Icons.favorite, 2), // Badge pour Favoris
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildTabContent() {
-    return SliverFillRemaining(
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildTransactionsList(),
-          _buildFavoritesList(),
-        ],
-      ),
-    );
-  }
+// Widget pour ajouter un badge aux onglets
+Widget _buildTab(String title, IconData icon, int badgeCount) {
+  return Tab(
+    icon: Stack(
+      children: [
+        Icon(icon, size: 24),
+        if (badgeCount > 0) // Affichage du badge si nécessaire
+          Positioned(
+            top: -5,
+            right: -5,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 16,
+                minHeight: 16,
+              ),
+              child: Text(
+                '$badgeCount',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    ),
+    text: title,
+  );
+}
+
+Widget _buildTabContent() {
+  return SliverFillRemaining(
+    child: TabBarView(
+      controller: _tabController,
+      children: [
+        _buildTransactionsList(),
+        _buildFavoritesList(),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildTransactionsList() {
     return ListView.builder(

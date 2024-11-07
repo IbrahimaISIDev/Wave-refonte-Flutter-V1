@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wave_app/data/models/contact_model.dart';
 import 'package:wave_app/bloc/contact/contact_state.dart';
 import 'package:wave_app/bloc/contact/contact_event.dart';
 import 'package:wave_app/data/repositories/contact_repository.dart';

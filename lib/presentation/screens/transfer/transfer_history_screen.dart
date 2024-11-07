@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_event.dart';
 import 'package:wave_app/bloc/transfer/transfer_state.dart';
-import 'package:wave_app/data/models/transfer_model.dart';
 
 class TransferHistoryScreen extends StatefulWidget {
   const TransferHistoryScreen({super.key});

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 // Importez vos écrans
-import 'login_screen.dart';
-import 'register_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -74,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Bienvenue sur Wave',
+                        'Bienvenue sur SamaXalis',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -92,7 +90,7 @@ class WelcomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
                 
                 // Boutons avec animation
                 TweenAnimationBuilder(

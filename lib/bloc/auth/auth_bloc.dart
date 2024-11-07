@@ -6,7 +6,9 @@ import 'package:wave_app/data/repositories/auth_repository.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
 
-  AuthBloc(this._authRepository) : super(AuthInitial()) {
+  AuthBloc({required AuthRepository authRepository}) : 
+    _authRepository = authRepository,
+    super(AuthInitial()) {
     on<LoginEvent>(_handleLogin);
     on<RegisterEvent>(_handleRegister);
     on<LogoutEvent>(_handleLogout);

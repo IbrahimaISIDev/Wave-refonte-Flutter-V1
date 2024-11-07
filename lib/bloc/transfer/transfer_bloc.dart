@@ -2,7 +2,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
-import 'package:wave_app/data/models/transfer_model.dart';
 import 'package:wave_app/data/repositories/transfer_repository.dart';
 import 'transfer_event.dart';
 import 'transfer_state.dart';
@@ -31,17 +30,21 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
         emit(TransferError('Utilisateur non authentifié'));
       }
     } catch (e) {
-      emit(TransferError(e.toString()));
+      emit(TransferError('Erreur lors de la création du transfert : ${e.toString()}'));
     }
   }
 
   Future<void> _handleGetTransferHistory(GetTransferHistoryEvent event, Emitter<TransferState> emit) async {
     emit(TransferLoading());
     try {
-      final transferHistory = await _transferRepository.getTransferHistory();
-      emit(TransferHistoryLoaded(transferHistory));
+      if (_authBloc.state is AuthAuthenticated) {
+        final transferHistory = await _transferRepository.getTransferHistory();
+        emit(TransferHistoryLoaded(transferHistory));
+      } else {
+        emit(TransferError('Utilisateur non authentifié'));
+      }
     } catch (e) {
-      emit(TransferError(e.toString()));
+      emit(TransferError('Erreur lors du chargement de l’historique : ${e.toString()}'));
     }
   }
 }

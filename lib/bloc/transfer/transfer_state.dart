@@ -1,8 +1,12 @@
+
 // lib/bloc/transfer/transfer_state.dart
-// transfer_state.dart
+import 'package:equatable/equatable.dart';
 import 'package:wave_app/data/models/transfer_model.dart';
 
-abstract class TransferState {}
+abstract class TransferState extends Equatable {
+  @override
+  List<Object> get props => [];
+}
 
 class TransferInitial extends TransferState {}
 
@@ -10,20 +14,33 @@ class TransferLoading extends TransferState {}
 
 class TransferSuccess extends TransferState {
   final TransferModel transfer;
+
   TransferSuccess(this.transfer);
-}
 
-class TransferHistoryLoaded extends TransferState {
-  final List<TransferModel> transferHistory;
-  TransferHistoryLoaded(this.transferHistory);
-
-  get transfers => null;
+  @override
+  List<Object> get props => [transfer];
 }
 
 class TransferError extends TransferState {
   final String message;
+
   TransferError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
+
+class TransferHistoryLoaded extends TransferState {
+  final List<TransferModel> transferHistory;
+
+  TransferHistoryLoaded(this.transferHistory);
+
+  @override
+  List<Object> get props => [transferHistory];
+
+  get transfers => null;
+}
+
 
 
 // abstract class TransferState {}

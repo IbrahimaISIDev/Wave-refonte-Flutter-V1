@@ -38,6 +38,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.2
   flutter_launcher_icons: ^0.13.1
+  permission_handler: ^10.0.0 # Pour gérer les autorisations
 
 flutter_icons:
   android: true
@@ -50,7 +51,6 @@ flutter:
   assets:
     - assets/images/samaxaalis.jpeg    
     - assets/images/logo_wave.png
-    - assets/images/samaxaalis.jpeg
     - assets/fonts/
 
   fonts:
