@@ -1,4 +1,3 @@
-
 // lib/bloc/transfer/transfer_state.dart
 import 'package:equatable/equatable.dart';
 import 'package:wave_app/data/models/transfer_model.dart';
@@ -21,13 +20,29 @@ class TransferSuccess extends TransferState {
   List<Object> get props => [transfer];
 }
 
-class TransferError extends TransferState {
-  final String message;
+class MultipleTransferSuccess extends TransferState {
+  final List<TransferModel> transfers;
+  final int successCount;
+  final int totalCount;
 
-  TransferError(this.message);
+  MultipleTransferSuccess({
+    required this.transfers,
+    required this.successCount,
+    required this.totalCount,
+  });
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [transfers, successCount, totalCount];
+}
+
+class TransferError extends TransferState {
+  final String message;
+  final List<TransferModel>? partialTransfers;
+
+  TransferError(this.message, {this.partialTransfers});
+
+  @override
+  List<Object> get props => [message, partialTransfers ?? []];
 }
 
 class TransferHistoryLoaded extends TransferState {

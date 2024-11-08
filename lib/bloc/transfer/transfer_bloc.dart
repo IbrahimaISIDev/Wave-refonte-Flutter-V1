@@ -12,6 +12,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
 
   TransferBloc(this._transferRepository, this._authBloc) : super(TransferInitial()) {
     on<CreateTransferEvent>(_handleCreateTransfer);
+    on<CreateMultipleTransferEvent>(_handleCreateMultipleTransfer);
     on<GetTransferHistoryEvent>(_handleGetTransferHistory);
   }
 
@@ -34,7 +35,53 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
     }
   }
 
-  Future<void> _handleGetTransferHistory(GetTransferHistoryEvent event, Emitter<TransferState> emit) async {
+  Future<void> _handleCreateMultipleTransfer(
+    CreateMultipleTransferEvent event,
+    Emitter<TransferState> emit,
+  ) async {
+    emit(TransferLoading());
+    try {
+      if (_authBloc.state is! AuthAuthenticated) {
+        emit(TransferError('Utilisateur non authentifié'));
+        return;
+      }
+
+      final currentUser = (_authBloc.state as AuthAuthenticated).user;
+      
+      // Calculer le montant total
+      final totalAmount = event.transfers.fold<double>(
+        0,
+        (sum, transfer) => sum + (transfer['amount'] as double),
+      );
+
+      // Vérifier le solde
+      if (!await _transferRepository.checkBalance(totalAmount)) {
+        emit(TransferError('Solde insuffisant pour effectuer tous les transferts'));
+        return;
+      }
+
+      // Effectuer les transferts
+      final transfers = await _transferRepository.createMultipleTransfers(
+        currentUser.id,
+        event.transfers,
+      );
+
+      emit(MultipleTransferSuccess(
+        transfers: transfers,
+        successCount: transfers.length,
+        totalCount: event.transfers.length,
+      ));
+    } catch (e) {
+      emit(TransferError(
+        'Erreur lors des transferts multiples : ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> _handleGetTransferHistory(
+    GetTransferHistoryEvent event,
+    Emitter<TransferState> emit,
+  ) async {
     emit(TransferLoading());
     try {
       if (_authBloc.state is AuthAuthenticated) {
@@ -44,7 +91,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
         emit(TransferError('Utilisateur non authentifié'));
       }
     } catch (e) {
-      emit(TransferError('Erreur lors du chargement de l’historique : ${e.toString()}'));
+      emit(TransferError('Erreur lors du chargement de l\'historique : ${e.toString()}'));
     }
   }
 }
