@@ -14,8 +14,7 @@ class AppRoutes {
   static const String transfer = '/transfer';
   static const String transferHistory = '/transfer-history';
   static const String merchantScanner = '/merchant';
-  static const String otpVerification =
-      '/otp-verification'; // Correct variable name
+  static const String otpVerification = '/otp-verification'; 
 
   static Map<String, Widget Function(BuildContext)> getRoutes() {
     return {

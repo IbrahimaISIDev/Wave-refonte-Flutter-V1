@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wave_app/utils/validators.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,9 +11,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _secretCodeController = TextEditingController(); // Remplacer _passwordController par _secretCodeController
   bool _isLoading = false;
-  bool _obscurePassword = true;
+  bool _obscureSecretCode = true;
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -81,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _passwordController.dispose();
+    _secretCodeController.dispose(); // Disposer du controller du code secret
     super.dispose();
   }
 
@@ -148,20 +147,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 20),
                         
+                        // Remplacer le champ de mot de passe par le champ pour le code secret
                         _buildTextField(
-                          controller: _passwordController,
-                          hintText: 'Mot de passe',
+                          controller: _secretCodeController,
+                          hintText: 'Code secret',
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _obscurePassword,
-                          validator: FormValidators.validatePassword,
+                          obscureText: _obscureSecretCode,
+                          validator: FormValidators.validateSecretCode, // Utilisation de validateSecretCode
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              _obscureSecretCode ? Icons.visibility : Icons.visibility_off,
                               color: Theme.of(context).primaryColor,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscurePassword = !_obscurePassword;
+                                _obscureSecretCode = !_obscureSecretCode;
                               });
                             },
                           ),
@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               // Navigation vers la page de récupération
                             },
                             child: Text(
-                              'Mot de passe oublié ?',
+                              'Code secret oublié ?',
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.w500,

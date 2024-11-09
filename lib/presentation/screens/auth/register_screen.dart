@@ -15,8 +15,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _secretCodeController = TextEditingController();
+  final _confirmSecretCodeController = TextEditingController();
   final _addressController = TextEditingController();
   final _birthdateController = TextEditingController();
 
@@ -25,8 +25,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   DateTime? _selectedDate;
   String _selectedGender = 'Non spécifié';
 
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
+  bool _obscureSecretCode = true;
+  bool _obscureConfirmSecretCode = true;
   bool _isLoading = false;
   bool _acceptTerms = false;
 
@@ -216,9 +216,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         _buildTextField(
                           controller: _nameController,
-                          hintText: 'Nom complet',
+                          hintText: 'Nom',
                           prefixIcon: Icons.person_outline,
                           validator: FormValidators.validateName,
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildTextField(
+                          controller: _nameController,
+                          hintText: 'Prénom',
+                          prefixIcon: Icons.person_outline,
+                          validator: FormValidators.validateSurname,
                         ),
                         const SizedBox(height: 20),
 
@@ -280,7 +288,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           hintText: 'Numéro de téléphone',
                           prefixIcon: Icons.phone_android,
                           keyboardType: TextInputType.phone,
-                          validator: FormValidator.validatePhone,
+                          validator: FormValidators.validatePhone,
                         ),
                         const SizedBox(height: 20),
 
@@ -289,54 +297,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           hintText: 'Email',
                           prefixIcon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
-                          validator: FormValidator.validateEmail,
+                          validator: FormValidators.validateEmail,
                         ),
                         const SizedBox(height: 20),
 
+// Champ pour entrer le code secret
                         _buildTextField(
-                          controller: _passwordController,
-                          hintText: 'Mot de passe',
+                          controller: _secretCodeController,
+                          hintText: 'Code Secret',
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _obscurePassword,
+                          obscureText: _obscureSecretCode,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword
+                              _obscureSecretCode
                                   ? Icons.visibility
                                   : Icons.visibility_off,
                               color: Colors.white70,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscurePassword = !_obscurePassword;
+                                _obscureSecretCode = !_obscureSecretCode;
                               });
                             },
                           ),
-                          validator: FormValidator.validatePassword,
+                          validator: FormValidators.validateSecretCode,
                         ),
                         const SizedBox(height: 20),
 
+// Champ pour confirmer le code secret
                         _buildTextField(
-                          controller: _confirmPasswordController,
-                          hintText: 'Confirmer le mot de passe',
+                          controller: _confirmSecretCodeController,
+                          hintText: 'Confirmer le code secret',
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _obscureConfirmPassword,
+                          obscureText: _obscureConfirmSecretCode,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword
+                              _obscureConfirmSecretCode
                                   ? Icons.visibility
                                   : Icons.visibility_off,
                               color: Colors.white70,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword;
+                                _obscureConfirmSecretCode =
+                                    !_obscureConfirmSecretCode;
                               });
                             },
                           ),
-                          validator: FormValidator.validateConfirmPassword,
+                          // Passer la valeur du code secret pour validation
+                          validator: (value) =>
+                              FormValidators.validateConfirmSecretCode(
+                                  _secretCodeController.text)(value),
                         ),
-                        const SizedBox(height: 20),
 
                         Row(
                           children: [
@@ -544,46 +556,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _secretCodeController.dispose();
+    _confirmSecretCodeController.dispose();
     super.dispose();
-  }
-}
-
-// Widget utilitaire pour la validation des champs
-class FormValidator {
-  // ignore: prefer_typing_uninitialized_variables
-  static var validateConfirmPassword;
-
-  static String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Veuillez entrer votre email';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Email invalide';
-    }
-    return null;
-  }
-
-  static String? validatePhone(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Veuillez entrer votre numéro de téléphone';
-    }
-    final phoneRegex = RegExp(r'^\d{9,}$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Numéro de téléphone invalide';
-    }
-    return null;
-  }
-
-  static String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Veuillez entrer un mot de passe';
-    }
-    if (value.length < 8) {
-      return 'Le mot de passe doit contenir au moins 8 caractères';
-    }
-    return null;
   }
 }
