@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:wave_app/utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -217,12 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _nameController,
                           hintText: 'Nom complet',
                           prefixIcon: Icons.person_outline,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre nom';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validateName,
                         ),
                         const SizedBox(height: 20),
 
@@ -232,12 +228,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           prefixIcon: Icons.calendar_today,
                           readOnly: true,
                           onTap: _selectDate,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre date de naissance';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validateBirthdate,
                         ),
                         const SizedBox(height: 20),
 
@@ -280,12 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _addressController,
                           hintText: 'Adresse',
                           prefixIcon: Icons.location_on_outlined,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre adresse';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validateAddress,
                         ),
                         const SizedBox(height: 20),
 
@@ -348,12 +334,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               });
                             },
                           ),
-                          validator: (value) {
-                            if (value != _passwordController.text) {
-                              return 'Les mots de passe ne correspondent pas';
-                            }
-                            return null;
-                          },
+                          validator: FormValidator.validateConfirmPassword,
                         ),
                         const SizedBox(height: 20),
 
@@ -571,6 +552,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // Widget utilitaire pour la validation des champs
 class FormValidator {
+  // ignore: prefer_typing_uninitialized_variables
+  static var validateConfirmPassword;
+
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Veuillez entrer votre email';

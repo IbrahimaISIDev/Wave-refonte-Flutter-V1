@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wave_app/presentation/screens/auth/login_screen.dart';
 import 'package:wave_app/presentation/screens/auth/register_screen.dart';
+import 'package:wave_app/presentation/screens/auth/otp-verification.dart';
 import 'package:wave_app/presentation/screens/home_screen.dart';
 import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
 import 'package:wave_app/presentation/screens/transfer/merchant_scanner_screen.dart';
@@ -13,6 +14,8 @@ class AppRoutes {
   static const String transfer = '/transfer';
   static const String transferHistory = '/transfer-history';
   static const String merchantScanner = '/merchant';
+  static const String otpVerification =
+      '/otp-verification'; // Correct variable name
 
   static Map<String, Widget Function(BuildContext)> getRoutes() {
     return {
@@ -22,25 +25,35 @@ class AppRoutes {
       transfer: (context) => const TransferScreen(),
       transferHistory: (context) => const TransferHistoryScreen(),
       merchantScanner: (context) => const MerchantScannerScreen(),
+      otpVerification: (context) => OtpVerificationScreen(
+            phoneNumber: ModalRoute.of(context)!.settings.arguments as String,
+          ),
     };
   }
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    // Vous pouvez ajouter ici une logique pour gérer les routes dynamiques
-    // ou les routes avec des paramètres
-   if (settings.name == login) {
-      return MaterialPageRoute(builder: (context) => const LoginScreen());
-    } else if (settings.name == register) {
-      return MaterialPageRoute(builder: (context) => const RegisterScreen());
-    } else if (settings.name == home) {
-      return MaterialPageRoute(builder: (context) => const HomeScreen());
-    } else if (settings.name == transfer) {
-      return MaterialPageRoute(builder: (context) => const TransferScreen());
-    } else if (settings.name == transferHistory) {
-      return MaterialPageRoute(builder: (context) => const TransferHistoryScreen());
-    } else if (settings.name == merchantScanner) {
-      return MaterialPageRoute(builder: (context) => const MerchantScannerScreen());
+    switch (settings.name) {
+      case login:
+        return MaterialPageRoute(builder: (context) => const LoginScreen());
+      case register:
+        return MaterialPageRoute(builder: (context) => const RegisterScreen());
+      case home:
+        return MaterialPageRoute(builder: (context) => const HomeScreen());
+      case transfer:
+        return MaterialPageRoute(builder: (context) => const TransferScreen());
+      case transferHistory:
+        return MaterialPageRoute(
+            builder: (context) => const TransferHistoryScreen());
+      case merchantScanner:
+        return MaterialPageRoute(
+            builder: (context) => const MerchantScannerScreen());
+      case otpVerification:
+        final phoneNumber = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (context) => OtpVerificationScreen(phoneNumber: phoneNumber),
+        );
+      default:
+        return null;
     }
-    return null;
   }
 }

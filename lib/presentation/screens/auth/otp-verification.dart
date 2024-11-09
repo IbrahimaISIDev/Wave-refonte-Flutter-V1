@@ -1,11 +1,13 @@
+// ignore: file_names
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
-  
+
   const OtpVerificationScreen({
-    super.key, 
+    super.key,
     required this.phoneNumber,
   });
 
@@ -23,7 +25,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     (index) => FocusNode(),
   );
   bool _isLoading = false;
+  Timer? _timer;
   
+  int _resendTime = 60;
+  bool _canResendCode = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,26 +37,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     _startResendTimer();
   }
 
-  int _resendTime = 60;
-  bool _canResendCode = false;
-
   void _startResendTimer() {
     setState(() {
       _resendTime = 60;
       _canResendCode = false;
     });
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted && _resendTime > 0) {
+    
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendTime > 0) {
         setState(() {
           _resendTime--;
         });
-        if (_resendTime > 0) {
-          _startResendTimer();
-        } else {
-          setState(() {
-            _canResendCode = true;
-          });
-        }
+      } else {
+        timer.cancel();
+        setState(() {
+          _canResendCode = true;
+        });
       }
     });
   }
@@ -291,6 +293,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     for (var controller in _controllers) {
       controller.dispose();
     }
