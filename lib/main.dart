@@ -6,11 +6,10 @@ import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
 import 'package:wave_app/data/repositories/auth_repository.dart';
 import 'package:wave_app/data/repositories/transfer_repository.dart';
 import 'package:wave_app/presentation/screens/auth/welcome_screen.dart';
-import 'package:wave_app/presentation/screens/auth/login_screen.dart';
-import 'package:wave_app/presentation/screens/auth/register_screen.dart';
+// ignore: depend_on_referenced_packages
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:wave_app/presentation/screens/home_screen.dart';
-import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
-import 'package:wave_app/presentation/screens/transfer/transfer_history_screen.dart';
+import 'package:wave_app/routes/app_routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,6 +44,16 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
+          // Configuration des localisations
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('fr', 'FR'),
+          ],
+          locale: const Locale('fr', 'FR'),
           title: 'Wave App',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -54,11 +63,12 @@ class MyApp extends StatelessWidget {
               primary: Colors.deepPurple,
               secondary: Colors.purpleAccent.shade200,
               surface: Colors.white,
+              // ignore: deprecated_member_use
               background: Colors.grey[100]!,
               error: Colors.red.shade400,
             ),
             useMaterial3: true,
-            
+
             fontFamily: 'Poppins',
             textTheme: TextTheme(
               headlineLarge: TextStyle(
@@ -77,7 +87,39 @@ class MyApp extends StatelessWidget {
               bodyMedium: TextStyle(color: Colors.grey.shade700),
               bodySmall: TextStyle(color: Colors.grey.shade600),
             ),
-            
+
+            // Personnalisation du thème de date
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: Colors.white,
+              headerBackgroundColor: Colors.deepPurple,
+              headerForegroundColor: Colors.white,
+              surfaceTintColor: Colors.deepPurple.shade50,
+              dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.deepPurple;
+                }
+                return null;
+              }),
+              dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.white;
+                }
+                return Colors.deepPurple.shade900;
+              }),
+              yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.deepPurple;
+                }
+                return null;
+              }),
+              yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.white;
+                }
+                return Colors.deepPurple.shade900;
+              }),
+            ),
+
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: Colors.white.withOpacity(0.85),
@@ -91,11 +133,13 @@ class MyApp extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(28),
-                borderSide: BorderSide(color: Colors.deepPurple.shade300, width: 1),
+                borderSide:
+                    BorderSide(color: Colors.deepPurple.shade300, width: 1),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             ),
-            
+
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple.shade900,
@@ -104,10 +148,11 @@ class MyApp extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               ),
             ),
-            
+
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: Colors.deepPurple.shade900,
@@ -117,7 +162,7 @@ class MyApp extends StatelessWidget {
                 textStyle: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
-            
+
             iconTheme: IconThemeData(
               color: Colors.deepPurple.shade700,
             ),
@@ -130,13 +175,8 @@ class MyApp extends StatelessWidget {
               return const WelcomeScreen();
             },
           ),
-          routes: {
-            '/login': (context) => const LoginScreen(),
-            '/register': (context) => const RegisterScreen(),
-            '/home': (context) => const HomeScreen(),
-            '/transfer': (context) => const TransferScreen(),
-            '/transfer-history': (context) => const TransferHistoryScreen(),
-          },
+          routes: AppRoutes.getRoutes(),
+          onGenerateRoute: AppRoutes.onGenerateRoute,
         ),
       ),
     );

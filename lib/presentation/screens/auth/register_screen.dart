@@ -18,12 +18,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   final _addressController = TextEditingController();
   final _birthdateController = TextEditingController();
-  
+
   File? _profileImage;
   final _picker = ImagePicker();
   DateTime? _selectedDate;
   String _selectedGender = 'Non spécifié';
-  
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
@@ -37,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         maxHeight: 1000,
         imageQuality: 85,
       );
-      
+
       if (pickedFile != null) {
         setState(() {
           _profileImage = File(pickedFile.path);
@@ -46,7 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la sélection de l\'image')),
+        const SnackBar(
+            content: Text('Erreur lors de la sélection de l\'image')),
       );
     }
   }
@@ -54,16 +55,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 6570)), // 18 ans
+      initialDate:
+          DateTime.now().subtract(const Duration(days: 6570)), // 18 ans
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       locale: const Locale('fr', 'FR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _birthdateController.text = '${picked.day}/${picked.month}/${picked.year}';
+        // Format de date en français avec padding pour les jours et mois
+        final day = picked.day.toString().padLeft(2, '0');
+        final month = picked.month.toString().padLeft(2, '0');
+        _birthdateController.text = '$day/$month/${picked.year}';
       });
     }
   }
@@ -74,13 +98,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
-          title: const Text('Choisir une photo de profil', style: TextStyle(color: Colors.white)),
+          title: const Text('Choisir une photo de profil',
+              style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.white),
-                title: const Text('Prendre une photo', style: TextStyle(color: Colors.white)),
+                title: const Text('Prendre une photo',
+                    style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
@@ -88,7 +114,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Colors.white),
-                title: const Text('Choisir depuis la galerie', style: TextStyle(color: Colors.white)),
+                title: const Text('Choisir depuis la galerie',
+                    style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -127,16 +154,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   Text(
                     'Créer un compte',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 10),
-                  
+
                   Text(
                     'Rejoignez Wave pour des transferts d\'argent simples et sécurisés',
                     style: TextStyle(
@@ -145,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  
+
                   // Photo de profil
                   Center(
                     child: Stack(
@@ -153,12 +180,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         CircleAvatar(
                           radius: 60,
                           backgroundColor: Colors.white.withOpacity(0.2),
-                          backgroundImage: _profileImage != null 
-                            ? FileImage(_profileImage!) 
-                            : null,
+                          backgroundImage: _profileImage != null
+                              ? FileImage(_profileImage!)
+                              : null,
                           child: _profileImage == null
-                            ? const Icon(Icons.person, size: 60, color: Colors.white)
-                            : null,
+                              ? const Icon(Icons.person,
+                                  size: 60, color: Colors.white)
+                              : null,
                         ),
                         Positioned(
                           bottom: 0,
@@ -167,7 +195,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             backgroundColor: Colors.white,
                             radius: 20,
                             child: IconButton(
-                              icon: Icon(Icons.camera_alt, 
+                              icon: Icon(
+                                Icons.camera_alt,
                                 color: Theme.of(context).primaryColor,
                                 size: 20,
                               ),
@@ -179,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  
+
                   Form(
                     key: _formKey,
                     child: Column(
@@ -196,7 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 20),
-                        
+
                         _buildTextField(
                           controller: _birthdateController,
                           hintText: 'Date de naissance',
@@ -211,10 +240,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 20),
-                        
+
                         // Sélection du genre
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 5),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(30),
@@ -223,9 +253,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: DropdownButton<String>(
                               isExpanded: true,
                               value: _selectedGender,
-                              dropdownColor: Theme.of(context).primaryColor.withOpacity(0.8),
+                              dropdownColor: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.8),
                               style: const TextStyle(color: Colors.white),
-                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                              icon: const Icon(Icons.arrow_drop_down,
+                                  color: Colors.white),
                               items: ['Non spécifié', 'Homme', 'Femme']
                                   .map((String value) {
                                 return DropdownMenuItem<String>(
@@ -255,7 +288,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 20),
-                        
+
                         _buildTextField(
                           controller: _phoneController,
                           hintText: 'Numéro de téléphone',
@@ -264,7 +297,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: FormValidator.validatePhone,
                         ),
                         const SizedBox(height: 20),
-                        
+
                         _buildTextField(
                           controller: _emailController,
                           hintText: 'Email',
@@ -273,7 +306,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: FormValidator.validateEmail,
                         ),
                         const SizedBox(height: 20),
-                        
+
                         _buildTextField(
                           controller: _passwordController,
                           hintText: 'Mot de passe',
@@ -281,7 +314,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                               color: Colors.white70,
                             ),
                             onPressed: () {
@@ -293,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: FormValidator.validatePassword,
                         ),
                         const SizedBox(height: 20),
-                        
+
                         _buildTextField(
                           controller: _confirmPasswordController,
                           hintText: 'Confirmer le mot de passe',
@@ -301,12 +336,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           obscureText: _obscureConfirmPassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                              _obscureConfirmPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                               color: Colors.white70,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
@@ -318,7 +356,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         const SizedBox(height: 20),
-                        
+
                         Row(
                           children: [
                             Checkbox(
@@ -345,7 +383,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                         const SizedBox(height: 30),
-                        
+
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -381,7 +419,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -395,7 +433,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushReplacementNamed(context, '/login');
+                                Navigator.pushReplacementNamed(
+                                    context, '/login');
                               },
                               child: const Text(
                                 'Se connecter',
@@ -479,14 +518,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _handleRegister() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       try {
         // Simuler un délai de traitement
         await Future.delayed(const Duration(seconds: 2));
-        
+
         // Ici, ajoutez votre logique d'inscription réelle
         // Par exemple, appel à votre API
-        
+
         // En cas de succès
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -495,7 +534,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.pushNamed(
+            context,
+            '/otp-verification',
+            arguments: _phoneController.text,
+          );
         }
       } catch (e) {
         // En cas d'erreur

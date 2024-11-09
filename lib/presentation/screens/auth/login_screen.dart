@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wave_app/utils/validators.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,25 +29,25 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: TextStyle(color: Colors.grey[600]), // Nouvelle couleur de texte
+      style: TextStyle(color: Colors.grey[600]),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.grey), // Nouvelle couleur de hint
-        prefixIcon: Icon(prefixIcon, color: Theme.of(context).primaryColor), // Nouvelle couleur d'icône
+        hintStyle: const TextStyle(color: Colors.grey),
+        prefixIcon: Icon(prefixIcon, color: Theme.of(context).primaryColor),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.grey[100], // Nouveau fond
+        fillColor: Colors.grey[100],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.8)), // Nouvelle bordure
+          borderSide: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.8)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Colors.grey[300]!), // Nouvelle bordure inactive
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor), // Nouvelle bordure active
+          borderSide: BorderSide(color: Theme.of(context).primaryColor),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 24,
@@ -56,14 +58,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _isLoading = false);
+      try {
+        // Ici vous pouvez ajouter votre logique d'authentification
+        await Future.delayed(const Duration(seconds: 2)); // Simulation d'appel API
         // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/home');
-      });
+      } catch (e) {
+        // Gérer les erreurs
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur de connexion: ${e.toString()}')),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -83,8 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white, // Fond blanc
-              Colors.grey[100]!, // Fond gris clair
+              Colors.white,
+              Colors.grey[100]!,
             ],
           ),
         ),
@@ -94,19 +105,17 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  // En-tête avec logo et retour
                   Row(
                     children: [
                       IconButton(
                         icon: Icon(Icons.arrow_back_ios, 
-                          color: Theme.of(context).primaryColor), // Nouvelle couleur de l'icône
+                          color: Theme.of(context).primaryColor),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
                   
-                  // Logo
                   Hero(
                     tag: 'logo',
                     child: Image.asset(
@@ -117,49 +126,38 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
                   
-                  // Titre
                   Text(
                     'Ravi de vous revoir !',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.grey[600], // Nouvelle couleur de texte
+                      color: Colors.grey[600],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 40),
                   
-                  // Formulaire
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Champ téléphone
                         _buildTextField(
                           controller: _phoneController,
                           hintText: 'Numéro de téléphone',
                           prefixIcon: Icons.phone_android,
                           keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre numéro de téléphone';
-                            }
-                            if (!RegExp(r'^\d{9,}$').hasMatch(value)) {
-                              return 'Numéro de téléphone invalide';
-                            }
-                            return null;
-                          },
+                          validator: FormValidators.validatePhone,
                         ),
                         const SizedBox(height: 20),
                         
-                        // Champ mot de passe
                         _buildTextField(
                           controller: _passwordController,
                           hintText: 'Mot de passe',
                           prefixIcon: Icons.lock_outline,
                           obscureText: _obscurePassword,
+                          validator: FormValidators.validatePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                              color: Theme.of(context).primaryColor, // Nouvelle couleur d'icône
+                              color: Theme.of(context).primaryColor,
                             ),
                             onPressed: () {
                               setState(() {
@@ -167,15 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               });
                             },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre mot de passe';
-                            }
-                            return null;
-                          },
                         ),
                         
-                        // Mot de passe oublié
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -185,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               'Mot de passe oublié ?',
                               style: TextStyle(
-                                color: Theme.of(context).primaryColor, // Nouvelle couleur du lien
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -193,20 +184,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 30),
                         
-                        // Bouton de connexion
                         SizedBox(
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor, // Nouvelle couleur de fond
-                              foregroundColor: Colors.white, // Nouvelle couleur de texte
+                              backgroundColor: Theme.of(context).primaryColor,
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               elevation: 2,
-                              shadowColor: Colors.black.withOpacity(0.1), // Nouvelle couleur d'ombre
+                              shadowColor: Colors.black.withOpacity(0.1),
                             ),
                             child: _isLoading
                                 ? const SizedBox(
