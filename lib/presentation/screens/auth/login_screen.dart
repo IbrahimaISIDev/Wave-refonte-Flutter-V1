@@ -155,6 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Code secret',
                             prefixIcon: Icons.lock_outline,
                             obscureText: _obscureSecretCode,
+                            keyboardType: TextInputType.number,
                             validator: FormValidators.validateSecretCode,
                             suffixIcon: IconButton(
                               icon: Icon(

@@ -2,7 +2,9 @@
 
 import 'package:wave_app/data/models/user_model.dart';
 
-abstract class AuthState {}
+abstract class AuthState {
+  get user => null;
+}
 
 class AuthInitial extends AuthState {}
 
@@ -32,4 +34,11 @@ class AuthError extends AuthState {
   final String message;
   
   AuthError(this.message);
+}
+
+class AuthSuccess extends AuthState {
+  @override
+  final UserModel user;
+
+  AuthSuccess(this.user);
 }

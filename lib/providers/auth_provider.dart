@@ -10,7 +10,7 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? _userData;
   String? _verificationPhone;
 
-  AuthProvider({ServiceAuth? authService}) 
+  AuthProvider({ServiceAuth? authService})
       : _authService = authService ?? ServiceAuth();
 
   bool get isLoading => _isLoading;
@@ -31,7 +31,8 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _setError(null);
 
-    print('Tentative d\'inscription avec : nom=$nom, prenom=$prenom, telephone=$telephone');
+    print(
+        'Tentative d\'inscription avec : nom=$nom, prenom=$prenom, telephone=$telephone');
 
     try {
       final response = await _authService.inscription(
@@ -69,7 +70,8 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     _setError(null);
 
-    print('Vérification OTP pour le téléphone $_verificationPhone avec le code $code');
+    print(
+        'Vérification OTP pour le téléphone $_verificationPhone avec le code $code');
 
     try {
       final response = await _authService.verifyOtp(
@@ -159,14 +161,15 @@ class AuthProvider extends ChangeNotifier {
 
   // Fonction pour inscrire un utilisateur avec une image de profil (non implémentée ici)
   // Update the register method to return a bool indicating success
-Future<bool> register(UserModel user, File? profileImage) async {
+// Mise à jour de la fonction register()
+  Future<bool> register(UserModel user, File? profileImage) async {
     _setLoading(true);
     _setError(null);
-    
+
     try {
-      // Handle profile image path properly
+      // Gérer le chemin de l'image de profil
       String? photoPath = profileImage?.path;
-      
+
       final response = await _authService.inscription(
         nom: user.nom,
         prenom: user.prenom,
@@ -180,7 +183,7 @@ Future<bool> register(UserModel user, File? profileImage) async {
 
       _userData = response;
       _verificationPhone = user.telephone;
-      
+
       print('Registration successful');
       return true;
     } catch (e) {
@@ -191,5 +194,4 @@ Future<bool> register(UserModel user, File? profileImage) async {
       _setLoading(false);
     }
   }
-
 }

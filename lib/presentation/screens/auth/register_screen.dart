@@ -7,7 +7,6 @@ import 'package:wave_app/providers/auth_provider.dart';
 import 'package:wave_app/utils/validators.dart';
 import 'package:mime/mime.dart';
 
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen(
       {super.key,
@@ -469,76 +468,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+// Mise à jour de la fonction _handleRegister()
+  void _handleRegister() async {
+    if (_formKey.currentState!.validate() && _acceptTerms) {
+      setState(() => _isLoading = true);
 
-void _handleRegister() async {
-  if (_formKey.currentState!.validate() && _acceptTerms) {
-    setState(() => _isLoading = true);
+      try {
+        // Convertir le genre sélectionné au format attendu
+        String sexe = _selectedGender == 'Homme' ? 'homme' : 'femme';
 
-    try {
-      // Convertir le genre sélectionné au format attendu
-      String sexe = _selectedGender == 'Homme' ? 'homme' : 'femme';
+        // Formater la date au format attendu par le backend (si nécessaire)
+        String formattedDate = _birthdateController.text;
 
-      // Formater la date au format attendu par le backend (si nécessaire)
-      String formattedDate = _birthdateController.text;
+        // Vérifier si l'image est valide (format image)
+        if (_profileImage != null) {
+          final mimeType = lookupMimeType(_profileImage!.path);
+          if (mimeType == null || !mimeType.startsWith('image/')) {
+            // Afficher une erreur si ce n'est pas une image valide
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text('Le fichier sélectionné n\'est pas une image valide.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            setState(() => _isLoading = false);
+            return;
+          }
+        }
 
-      // Vérifier si l'image est valide (format image)
-      if (_profileImage != null) {
-        // Utiliser lookupMimeType pour obtenir le type MIME du fichier
-        final mimeType = lookupMimeType(_profileImage!.path);
+        final user = UserModel.forRegistration(
+          nom: _nameController.text.trim(),
+          prenom: _surnameController.text.trim(),
+          telephone: _phoneController.text.trim(),
+          email: _emailController.text.trim(),
+          adresse: _addressController.text.trim(),
+          dateNaissance: formattedDate,
+          sexe: sexe,
+          photo: _profileImage?.path, // Ajouter le chemin de l'image
+        );
 
-        // Vérifier que le fichier est bien une image
-        if (mimeType == null || !mimeType.startsWith('image/')) {
-          // Afficher une erreur si ce n'est pas une image valide
+        // Envoi de l'image avec la requête d'inscription
+        final success = await Provider.of<AuthProvider>(context, listen: false)
+            .register(user, _profileImage);
+
+        if (success && mounted) {
+          Navigator.pushNamed(
+            context,
+            '/otp-verification',
+            arguments: _phoneController.text,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Le fichier sélectionné n\'est pas une image valide.'),
+              content: Text('Erreur lors de l\'inscription: $e'),
               backgroundColor: Colors.red,
             ),
           );
-          setState(() => _isLoading = false);
-          return;
         }
-      }
-
-      final user = UserModel.forRegistration(
-        nom: _nameController.text.trim(),
-        prenom: _surnameController.text.trim(),
-        telephone: _phoneController.text.trim(),
-        email: _emailController.text.trim(),
-        adresse: _addressController.text.trim(),
-        dateNaissance: formattedDate,
-        sexe: sexe,
-        photo: _profileImage?.path,  // Ajouter le chemin de l'image
-      );
-
-      // Envoi de l'image avec la requête d'inscription
-      final success = await Provider.of<AuthProvider>(context, listen: false)
-          .register(user, _profileImage);
-
-      if (success && mounted) {
-        Navigator.pushNamed(
-          context,
-          '/otp-verification',
-          arguments: _phoneController.text,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de l\'inscription: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
-}
-
 
   @override
   void dispose() {

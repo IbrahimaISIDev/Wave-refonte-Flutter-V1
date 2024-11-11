@@ -1,60 +1,111 @@
-// lib/bloc/transfer/transfer_state.dart
-import 'package:equatable/equatable.dart';
 import 'package:wave_app/data/models/transfer_model.dart';
 
-abstract class TransferState extends Equatable {
-  @override
-  List<Object> get props => [];
+abstract class TransferState {
+  String? get message => null;
 }
 
 class TransferInitial extends TransferState {}
 
-class TransferLoading extends TransferState {}
-
 class TransferSuccess extends TransferState {
-  final TransferModel transfer;
+  final TransferResult result;
 
-  TransferSuccess(this.transfer);
-
-  @override
-  List<Object> get props => [transfer];
+  TransferSuccess(this.result);
 }
 
 class MultipleTransferSuccess extends TransferState {
-  final List<TransferModel> transfers;
-  final int successCount;
-  final int totalCount;
+  final MultipleTransferResult result;
 
-  MultipleTransferSuccess({
-    required this.transfers,
-    required this.successCount,
-    required this.totalCount,
-  });
-
-  @override
-  List<Object> get props => [transfers, successCount, totalCount];
+  MultipleTransferSuccess(this.result);
 }
 
-class TransferError extends TransferState {
-  final String message;
-  final List<TransferModel>? partialTransfers;
+class TransferCancellationSuccess extends TransferState {
+  final CancelTransferResult result;
 
-  TransferError(this.message, {this.partialTransfers});
-
-  @override
-  List<Object> get props => [message, partialTransfers ?? []];
+  TransferCancellationSuccess(this.result);
 }
 
 class TransferHistoryLoaded extends TransferState {
-  final List<TransferModel> transferHistory;
+  final List<TransferHistory> history;
 
-  TransferHistoryLoaded(this.transferHistory);
-
-  @override
-  List<Object> get props => [transferHistory];
+  TransferHistoryLoaded(this.history);
 
   get transfers => null;
 }
+
+class TransferFailure extends TransferState {
+  final String error;
+
+  TransferFailure(this.error);
+}
+
+class TransferError{
+  final String error;
+  TransferError(this.error);
+}
+
+class TransferLoading{
+  TransferLoading();
+}
+
+
+
+// // lib/bloc/transfer/transfer_state.dart
+// import 'package:equatable/equatable.dart';
+// import 'package:wave_app/data/models/transfer_model.dart';
+
+// abstract class TransferState extends Equatable {
+//   @override
+//   List<Object> get props => [];
+// }
+
+// class TransferInitial extends TransferState {}
+
+// class TransferLoading extends TransferState {}
+
+// class TransferSuccess extends TransferState {
+//   final TransferModel transfer;
+
+//   TransferSuccess(this.transfer);
+
+//   @override
+//   List<Object> get props => [transfer];
+// }
+
+// class MultipleTransferSuccess extends TransferState {
+//   final List<TransferModel> transfers;
+//   final int successCount;
+//   final int totalCount;
+
+//   MultipleTransferSuccess({
+//     required this.transfers,
+//     required this.successCount,
+//     required this.totalCount,
+//   });
+
+//   @override
+//   List<Object> get props => [transfers, successCount, totalCount];
+// }
+
+// class TransferError extends TransferState {
+//   final String message;
+//   final List<TransferModel>? partialTransfers;
+
+//   TransferError(this.message, {this.partialTransfers});
+
+//   @override
+//   List<Object> get props => [message, partialTransfers ?? []];
+// }
+
+// class TransferHistoryLoaded extends TransferState {
+//   final List<TransferModel> transferHistory;
+
+//   TransferHistoryLoaded(this.transferHistory);
+
+//   @override
+//   List<Object> get props => [transferHistory];
+
+//   get transfers => null;
+// }
 
 
 

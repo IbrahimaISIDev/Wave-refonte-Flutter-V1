@@ -1,7 +1,7 @@
 // Définition du type de transaction
 enum TransactionType {
   sent,
-  received,
+  received, transfer,
 }
 
 // Définition du statut de transaction
@@ -25,6 +25,8 @@ class Transaction {
     required this.date,
     required this.status,
   });
+
+  static fromJson(t) {}
 }
 
 // lib/data/models/transaction.dart

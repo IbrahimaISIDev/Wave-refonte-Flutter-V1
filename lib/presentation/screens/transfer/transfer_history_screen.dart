@@ -18,7 +18,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
   void initState() {
     super.initState();
     // Assurez-vous que le nom de cet événement est bien défini dans TransferBloc
-    context.read<TransferBloc>().add(GetTransferHistoryEvent());
+    context.read<TransferBloc>().add(LoadTransferHistoryEvent() as TransferEvent);
   }
 
   @override
@@ -91,14 +91,14 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
               },
             );
           } else if (state is TransferError) {
-            return Center(
-              child: Text(
-                state.message,
-                style: GoogleFonts.poppins(color: Colors.red),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
+          return Center(
+            child: Text(
+              state.message ?? 'Une erreur est survenue',
+              style: GoogleFonts.poppins(color: Colors.red),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
         },
       ),
     );
@@ -137,3 +137,5 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
   }
 }
+
+

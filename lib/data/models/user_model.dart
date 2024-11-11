@@ -113,5 +113,7 @@ class UserModel {
   }
 
   get numeroCompte => null;
+
+  get balance => null;
   
 }
