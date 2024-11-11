@@ -111,5 +111,7 @@ class UserModel {
       photo: photo,
     );
   }
+
+  get numeroCompte => null;
   
 }

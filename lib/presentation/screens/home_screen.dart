@@ -235,14 +235,14 @@ class _HomeScreenState extends State<HomeScreen>
         margin: const EdgeInsets.all(20),
         child: Row(
           children: [
-            // Expanded(
-            //   child: _buildActionButton(
-            //     icon: Icons.qr_code,
-            //     label: 'Mon QR Code',
-            //     onTap: () =>
-            //         _showQRCode(context, state.user.numeroCompte ?? ''),
-            //   ),
-            // ),
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.qr_code,
+                label: 'Mon QR Code',
+                onTap: () =>
+                    _showQRCode(context, state.user.numeroCompte ?? ''),
+              ),
+            ),
             const SizedBox(width: 15),
             Expanded(
               child: _buildActionButton(
