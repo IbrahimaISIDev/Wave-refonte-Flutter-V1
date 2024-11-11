@@ -1,48 +1,115 @@
-// lib/data/models/user_model.dart
+import 'package:flutter/foundation.dart';
+
 class UserModel {
-  final String id;
-  final String name;
-  final String phone;
+  final int id;
+  final String nom;
+  final String prenom;
+  final String telephone;
+  final String? photo;
   final String email;
-  final String token;
+  final double solde;
+  final double promo;
+  final String? carte;
+  final bool etatcarte;
+  final String adresse;
+  final String dateNaissance;
+  final String? secret;
+  final int roleId;
   final String createdAt;
   final String updatedAt;
-  final bool isAdmin;
+  final String? accessToken;
+  final String sexe;
 
   UserModel({
     required this.id,
-    required this.name,
-    required this.phone,
+    required this.nom,
+    required this.prenom,
+    required this.telephone,
+    this.photo,
     required this.email,
-    required this.token,
+    required this.solde,
+    required this.promo,
+    this.carte,
+    required this.etatcarte,
+    required this.adresse,
+    required this.dateNaissance,
+    this.secret,
+    required this.roleId,
     required this.createdAt,
     required this.updatedAt,
-    required this.isAdmin,
+    this.accessToken,
+    required this.sexe,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> data) {
+  // Ajout du getter hasSetSecretCode
+  bool get hasSetSecretCode => secret != null && secret!.isNotEmpty;
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: data['id'],
-      name: data['name'],
-      phone: data['phone'],
-      email: data['email'],
-      token: data['token'],
-      createdAt: data['created_at'],
-      updatedAt: data['updated_at'],
-      isAdmin: data['isAdmin'],
+      id: json['id'] ?? 0,
+      nom: json['nom'] ?? '',
+      prenom: json['prenom'] ?? '',
+      telephone: json['telephone'] ?? '',
+      photo: json['photo'],
+      email: json['email'] ?? '',
+      // Correction de la conversion des valeurs décimales
+      solde: _parseDouble(json['solde']),
+      promo: _parseDouble(json['promo']),
+      carte: json['carte'],
+      etatcarte: json['etatcarte'] ?? false,
+      adresse: json['adresse'] ?? '',
+      dateNaissance: json['date_naissance'] ?? '',
+      secret: json['secret'],
+      roleId: json['role_id'] ?? 2,
+      createdAt: json['created_at'] ?? DateTime.now().toIso8601String(),
+      updatedAt: json['updated_at'] ?? DateTime.now().toIso8601String(),
+      accessToken: json['access_token'],
+      sexe: json['sexe'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'phone': phone,
-      'email': email,
-      'token': token,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-      'isAdmin': isAdmin,
-    };
+  // Méthode utilitaire pour parser les valeurs décimales
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value.replaceAll(",", "."));
+      } catch (e) {
+        debugPrint('Erreur de conversion en double: $e');
+        return 0.0;
+      }
+    }
+    return 0.0;
   }
+
+  factory UserModel.forRegistration({
+    required String nom,
+    required String prenom,
+    required String telephone,
+    required String email,
+    required String adresse,
+    required String dateNaissance,
+    required String sexe,
+    String? photo,
+  }) {
+    return UserModel(
+      id: 0,
+      nom: nom.trim(),
+      prenom: prenom.trim(),
+      telephone: telephone.trim(),
+      email: email.trim(),
+      adresse: adresse.trim(),
+      dateNaissance: dateNaissance,
+      sexe: sexe.toLowerCase(), // Ensure lowercase to match backend validation
+      solde: 0.0,
+      promo: 0.0,
+      etatcarte: false,
+      roleId: 2,
+      createdAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
+      photo: photo,
+    );
+  }
+  
 }

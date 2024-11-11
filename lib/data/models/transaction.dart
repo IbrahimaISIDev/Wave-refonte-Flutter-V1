@@ -26,3 +26,27 @@ class Transaction {
     required this.status,
   });
 }
+
+// lib/data/models/transaction.dart
+// import 'package:equatable/equatable.dart';
+
+// enum TransactionType { send, receive }
+
+// class Transaction extends Equatable {
+//   final String id;
+//   final double amount;
+//   final TransactionType type;
+//   final DateTime date;
+//   final String recipient;
+
+//   const Transaction({
+//     required this.id,
+//     required this.amount,
+//     required this.type,
+//     required this.date,
+//     required this.recipient,
+//   });
+
+//   @override
+//   List<Object> get props => [id, amount, type, date, recipient];
+// }
