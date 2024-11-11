@@ -11,7 +11,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    
+  shared_preferences: ^2.0.0
+  mime: ^1.0.0
+  
+  # Contact handling
+  flutter_contacts: ^1.1.7+1
+  provider: ^6.0.5
+  http: ^1.1.0
+      
   # UI
   cupertino_icons: ^1.0.8
   google_fonts: ^6.1.0
@@ -31,7 +38,7 @@ dependencies:
   mobile_scanner: ^3.5.7
   
   # Formatting
-  intl: ^0.19.0
+  intl: ^0.19.0  # Mis à jour pour utiliser 0.19.0 comme requis par flutter_localizations
 
 dev_dependencies:
   flutter_localizations:
@@ -41,6 +48,9 @@ dev_dependencies:
   flutter_lints: ^3.0.2
   flutter_launcher_icons: ^0.13.1
   permission_handler: ^10.0.0 # Pour gérer les autorisations
+
+dependency_overrides:
+  intl: ^0.19.0  # Force la version d'intl à 0.19.0 pour tous les packages
 
 flutter_icons:
   android: true

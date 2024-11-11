@@ -22,7 +22,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
       if (_authBloc.state is AuthAuthenticated) {
         final currentUser = (_authBloc.state as AuthAuthenticated).user;
         final transfer = await _transferRepository.createTransfer(
-          currentUser.id,
+          currentUser.id as String,
           event.recipientId,
           event.amount,
         );
@@ -62,7 +62,7 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
 
       // Effectuer les transferts
       final transfers = await _transferRepository.createMultipleTransfers(
-        currentUser.id,
+        currentUser.id as String,
         event.transfers,
       );
 

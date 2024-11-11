@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wave_app/data/models/user_model.dart';
+import 'package:wave_app/bloc/auth/auth_bloc.dart';
+import 'package:wave_app/bloc/auth/auth_event.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
+import 'package:wave_app/data/models/user_model.dart';
+import 'package:wave_app/presentation/screens/auth/login_screen.dart';
 
-// profile_screen.dart
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -24,39 +25,66 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthAuthenticated) {
-            return _buildProfileDetails(state.user);
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthUnauthenticated) {
+            // Redirection vers la page de connexion après déconnexion
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen(phone: '',)),
+              (route) => false,
+            );
           }
-          return const Center(child: CircularProgressIndicator());
         },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is AuthAuthenticated) {
+              return _buildProfileDetails(context, state.user);
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildProfileDetails(UserModel user) {
+  Widget _buildProfileDetails(BuildContext context, UserModel user) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 50,
+            backgroundImage: user.photo != null ? NetworkImage(user.photo!) : null,
             backgroundColor: Colors.blue,
-            child: Icon(Icons.person, size: 50, color: Colors.white),
+            child: user.photo == null
+                ? Icon(Icons.person, size: 50, color: Colors.white)
+                : null,
           ),
           const SizedBox(height: 24),
           _buildInfoCard(
             'Informations Personnelles',
             [
-              _buildInfoRow('Nom', user.name),
-              _buildInfoRow('Téléphone', user.phone),
-              _buildInfoRow('Email', user.email),
+              _buildInfoRow(Icons.person, 'Nom', user.nom),
+              _buildInfoRow(Icons.phone, 'Téléphone', user.telephone),
+              _buildInfoRow(Icons.email, 'Email', user.email),
+              _buildInfoRow(Icons.location_on, 'Adresse', user.adresse ?? 'Non renseigné'),
+              _buildInfoRow(Icons.cake, 'Date de naissance', user.dateNaissance ?? 'Non renseigné'),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildInfoCard(
+            'Solde & Promotions',
+            [
+              _buildInfoRow(Icons.account_balance_wallet, 'Solde', '${user.solde} FCFA'),
+              _buildInfoRow(Icons.local_offer, 'Promo', '${user.promo} %'),
             ],
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              context.read<AuthBloc>().add(AuthLogoutRequested());
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
@@ -103,17 +131,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              color: Colors.black54,
-              fontWeight: FontWeight.w500,
+          Icon(icon, color: Colors.blueAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: Colors.black54,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Text(
@@ -128,3 +159,18 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
+
+
+
+
+          // _buildInfoCard(
+          //   'Carte de Fidélité',
+          //   [
+          //     _buildInfoRow(Icons.credit_card, 'Numéro de carte', user.carte ?? 'Non renseigné'),
+          //     _buildInfoRow(
+          //         Icons.check_circle,
+          //         'Statut de la carte',
+          //         user.etatcarte ? 'Active' : 'Inactive',
+          //     ),
+          //   ],
+          // ),

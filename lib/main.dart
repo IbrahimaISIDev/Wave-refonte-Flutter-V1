@@ -1,36 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart'; // Ajoutez le package provider
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
+import 'package:wave_app/bloc/transaction/transaction_event.dart';
 import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
+import 'package:wave_app/bloc/transaction/transaction_bloc.dart';
 import 'package:wave_app/data/repositories/auth_repository.dart';
 import 'package:wave_app/data/repositories/transfer_repository.dart';
+import 'package:wave_app/data/repositories/transaction_repository.dart';
 import 'package:wave_app/presentation/screens/auth/welcome_screen.dart';
-// ignore: depend_on_referenced_packages
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:wave_app/presentation/screens/home_screen.dart';
 import 'package:wave_app/routes/app_routes.dart';
+import 'package:wave_app/providers/auth_provider.dart'; // Importer votre provider
 
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
+  runApp(
+    MultiProvider(
       providers: [
+        // Provider pour AuthProvider
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+        // Fournisseurs de dépôt
         RepositoryProvider(
           create: (context) => AuthRepository(),
         ),
         RepositoryProvider(
           create: (context) => TransferRepository(),
         ),
+        RepositoryProvider(
+          create: (context) => TransactionRepository(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
+          // Fournisseurs de blocs
           BlocProvider<AuthBloc>(
             create: (context) => AuthBloc(
               authRepository: context.read<AuthRepository>(),
@@ -42,9 +47,13 @@ class MyApp extends StatelessWidget {
               context.read<AuthBloc>(),
             ),
           ),
+          BlocProvider<TransactionBloc>(
+            create: (context) => TransactionBloc(
+              context.read<TransactionRepository>(),
+            ),
+          ),
         ],
         child: MaterialApp(
-          // Configuration des localisations
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
@@ -63,12 +72,10 @@ class MyApp extends StatelessWidget {
               primary: Colors.deepPurple,
               secondary: Colors.purpleAccent.shade200,
               surface: Colors.white,
-              // ignore: deprecated_member_use
               background: Colors.grey[100]!,
               error: Colors.red.shade400,
             ),
             useMaterial3: true,
-
             fontFamily: 'Poppins',
             textTheme: TextTheme(
               headlineLarge: TextStyle(
@@ -87,8 +94,6 @@ class MyApp extends StatelessWidget {
               bodyMedium: TextStyle(color: Colors.grey.shade700),
               bodySmall: TextStyle(color: Colors.grey.shade600),
             ),
-
-            // Personnalisation du thème de date
             datePickerTheme: DatePickerThemeData(
               backgroundColor: Colors.white,
               headerBackgroundColor: Colors.deepPurple,
@@ -119,7 +124,6 @@ class MyApp extends StatelessWidget {
                 return Colors.deepPurple.shade900;
               }),
             ),
-
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: Colors.white.withOpacity(0.85),
@@ -139,7 +143,6 @@ class MyApp extends StatelessWidget {
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             ),
-
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.deepPurple.shade900,
@@ -152,7 +155,6 @@ class MyApp extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               ),
             ),
-
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: Colors.deepPurple.shade900,
@@ -162,7 +164,6 @@ class MyApp extends StatelessWidget {
                 textStyle: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
-
             iconTheme: IconThemeData(
               color: Colors.deepPurple.shade700,
             ),
@@ -170,7 +171,10 @@ class MyApp extends StatelessWidget {
           home: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is AuthAuthenticated) {
-                return const HomeScreen();
+                return BlocProvider.value(
+                  value: context.read<TransactionBloc>()..add(LoadTransactions()),
+                  child: const HomeScreen(),
+                );
               }
               return const WelcomeScreen();
             },
@@ -179,6 +183,6 @@ class MyApp extends StatelessWidget {
           onGenerateRoute: AppRoutes.onGenerateRoute,
         ),
       ),
-    );
-  }
+    ),
+  );
 }

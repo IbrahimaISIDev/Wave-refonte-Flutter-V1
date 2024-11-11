@@ -2,6 +2,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:wave_app/providers/auth_provider.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -17,16 +19,16 @@ class OtpVerificationScreen extends StatefulWidget {
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<TextEditingController> _controllers = List.generate(
-    5,
+    6,
     (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(
-    5,
+    6,
     (index) => FocusNode(),
   );
   bool _isLoading = false;
   Timer? _timer;
-  
+
   int _resendTime = 60;
   bool _canResendCode = false;
 
@@ -42,7 +44,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       _resendTime = 60;
       _canResendCode = false;
     });
-    
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_resendTime > 0) {
         setState(() {
@@ -63,9 +65,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _handleVerification() async {
-    // Vérifier si tous les champs sont remplis
     String code = _controllers.map((controller) => controller.text).join();
-    if (code.length != 5) {
+    if (code.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez entrer le code complet'),
@@ -78,12 +79,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Simuler la vérification
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Si la vérification réussit
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+      final success = await Provider.of<AuthProvider>(context, listen: false)
+          .verifyOtp(code: code); // Pass code as a named parameter
+
+      if (success && mounted) {
+        Navigator.pushReplacementNamed(context, '/secret-code-setup');
       }
     } catch (e) {
       if (mounted) {
@@ -103,16 +103,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _resendCode() {
     if (!_canResendCode) return;
-    
+
     // Réinitialiser les champs
     for (var controller in _controllers) {
       controller.clear();
     }
     _focusNodes.first.requestFocus();
-    
+
     // Redémarrer le timer
     _startResendTimer();
-    
+
     // Afficher un message de confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -148,16 +148,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(height: 40),
-                  
+
                   Text(
                     'Vérification',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   Text(
                     'Nous avons envoyé un code de vérification au',
                     style: TextStyle(
@@ -166,7 +166,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   Text(
                     _formatPhoneNumber(widget.phoneNumber),
                     style: const TextStyle(
@@ -176,54 +176,72 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     ),
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Champs de saisie OTP
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(
-                      5,
-                      (index) => SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: TextFormField(
-                          controller: _controllers[index],
-                          focusNode: _focusNodes[index],
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              borderSide: BorderSide.none,
+                      6,
+                      (index) => Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(
+                                  0.15), // Légère ombre pour contraste
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(2, 3),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
-                              borderSide: const BorderSide(color: Colors.white, width: 1),
-                            ),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(1),
-                            FilteringTextInputFormatter.digitsOnly,
                           ],
-                          onChanged: (value) {
-                            if (value.isNotEmpty && index < 4) {
-                              _focusNodes[index + 1].requestFocus();
-                            } else if (value.isEmpty && index > 0) {
-                              _focusNodes[index - 1].requestFocus();
-                            }
-                          },
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: TextFormField(
+                            controller: _controllers[index],
+                            focusNode: _focusNodes[index],
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(
+                                  0.1), // Fond léger pour le contraste
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                borderSide: const BorderSide(
+                                    color: Colors.white, width: 1.5),
+                              ),
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white, // Texte blanc brillant
+                              fontSize:
+                                  22, // Taille du texte pour plus de visibilité
+                              fontWeight: FontWeight.bold,
+                            ),
+                            keyboardType: TextInputType.text,
+                            textAlign: TextAlign.center,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(1),
+                              FilteringTextInputFormatter.singleLineFormatter,
+                            ],
+                            onChanged: (value) {
+                              if (value.isNotEmpty && index < 5) {
+                                _focusNodes[index + 1].requestFocus();
+                              } else if (value.isEmpty && index > 0) {
+                                _focusNodes[index - 1].requestFocus();
+                              }
+                            },
+                          ),
                         ),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 40),
-                  
+
                   // Timer et bouton de renvoi
                   Center(
                     child: _canResendCode
@@ -247,7 +265,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           ),
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Bouton de validation
                   SizedBox(
                     width: double.infinity,
