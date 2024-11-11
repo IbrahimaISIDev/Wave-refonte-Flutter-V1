@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:wave_app/data/models/user_model.dart';
+import 'package:wave_app/providers/auth_provider.dart';
 import 'package:wave_app/utils/validators.dart';
+import 'package:mime/mime.dart';
+
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen(
+      {super.key,
+      required String name,
+      required String phone,
+      required String email});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -13,6 +22,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _secretCodeController = TextEditingController();
@@ -86,9 +96,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() {
         _selectedDate = picked;
         // Format de date en français avec padding pour les jours et mois
-        final day = picked.day.toString().padLeft(2, '0');
+        final year = picked.year.toString();
         final month = picked.month.toString().padLeft(2, '0');
-        _birthdateController.text = '$day/$month/${picked.year}';
+        final day = picked.day.toString().padLeft(2, '0');
+        _birthdateController.text = '$year-$month-$day';
       });
     }
   }
@@ -223,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 20),
 
                         _buildTextField(
-                          controller: _nameController,
+                          controller: _surnameController,
                           hintText: 'Prénom',
                           prefixIcon: Icons.person_outline,
                           validator: FormValidators.validateSurname,
@@ -300,56 +311,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: FormValidators.validateEmail,
                         ),
                         const SizedBox(height: 20),
-
-// Champ pour entrer le code secret
-                        _buildTextField(
-                          controller: _secretCodeController,
-                          hintText: 'Code Secret',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _obscureSecretCode,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureSecretCode
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white70,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureSecretCode = !_obscureSecretCode;
-                              });
-                            },
-                          ),
-                          validator: FormValidators.validateSecretCode,
-                        ),
-                        const SizedBox(height: 20),
-
-// Champ pour confirmer le code secret
-                        _buildTextField(
-                          controller: _confirmSecretCodeController,
-                          hintText: 'Confirmer le code secret',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _obscureConfirmSecretCode,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirmSecretCode
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white70,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmSecretCode =
-                                    !_obscureConfirmSecretCode;
-                              });
-                            },
-                          ),
-                          // Passer la valeur du code secret pour validation
-                          validator: (value) =>
-                              FormValidators.validateConfirmSecretCode(
-                                  _secretCodeController.text)(value),
-                        ),
-
                         Row(
                           children: [
                             Checkbox(
@@ -508,48 +469,76 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void _handleRegister() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
 
-      try {
-        // Simuler un délai de traitement
-        await Future.delayed(const Duration(seconds: 2));
+void _handleRegister() async {
+  if (_formKey.currentState!.validate() && _acceptTerms) {
+    setState(() => _isLoading = true);
 
-        // Ici, ajoutez votre logique d'inscription réelle
-        // Par exemple, appel à votre API
+    try {
+      // Convertir le genre sélectionné au format attendu
+      String sexe = _selectedGender == 'Homme' ? 'homme' : 'femme';
 
-        // En cas de succès
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Inscription réussie !'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pushNamed(
-            context,
-            '/otp-verification',
-            arguments: _phoneController.text,
-          );
-        }
-      } catch (e) {
-        // En cas d'erreur
-        if (mounted) {
+      // Formater la date au format attendu par le backend (si nécessaire)
+      String formattedDate = _birthdateController.text;
+
+      // Vérifier si l'image est valide (format image)
+      if (_profileImage != null) {
+        // Utiliser lookupMimeType pour obtenir le type MIME du fichier
+        final mimeType = lookupMimeType(_profileImage!.path);
+
+        // Vérifier que le fichier est bien une image
+        if (mimeType == null || !mimeType.startsWith('image/')) {
+          // Afficher une erreur si ce n'est pas une image valide
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erreur lors de l\'inscription: ${e.toString()}'),
+              content: Text('Le fichier sélectionné n\'est pas une image valide.'),
               backgroundColor: Colors.red,
             ),
           );
-        }
-      } finally {
-        if (mounted) {
           setState(() => _isLoading = false);
+          return;
         }
+      }
+
+      final user = UserModel.forRegistration(
+        nom: _nameController.text.trim(),
+        prenom: _surnameController.text.trim(),
+        telephone: _phoneController.text.trim(),
+        email: _emailController.text.trim(),
+        adresse: _addressController.text.trim(),
+        dateNaissance: formattedDate,
+        sexe: sexe,
+        photo: _profileImage?.path,  // Ajouter le chemin de l'image
+      );
+
+      // Envoi de l'image avec la requête d'inscription
+      final success = await Provider.of<AuthProvider>(context, listen: false)
+          .register(user, _profileImage);
+
+      if (success && mounted) {
+        Navigator.pushNamed(
+          context,
+          '/otp-verification',
+          arguments: _phoneController.text,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'inscription: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
+}
+
 
   @override
   void dispose() {
@@ -561,4 +550,3 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 }
-

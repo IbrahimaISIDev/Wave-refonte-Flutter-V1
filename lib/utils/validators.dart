@@ -21,32 +21,36 @@ class FormValidators {
     return null;
   }
 
-  static String? validateSecretCode(String? value) {
-    // Ici, on vérifie que le code secret a une longueur minimale de 5 chiffres
+
+    static String? validateSecretCode(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Veuillez entrer un code secret';
+      return 'Veuillez entrer votre code secret';
     }
-    final secretCodeRegex =
-        RegExp(r'^\d{5}$'); // Code secret composé de 5 chiffres
-    if (!secretCodeRegex.hasMatch(value)) {
-      return 'Le code secret doit être composé de 5 chiffres';
+    if (value.length != 4) {
+      return 'Le code secret doit contenir 4 chiffres';
+    }
+    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+      return 'Le code secret doit contenir uniquement des chiffres';
     }
     return null;
   }
 
-  static String? Function(String?) validateConfirmSecretCode(
-      String secretCode) {
-    return (String? value) {
-      if (value != secretCode) {
-        return 'Les codes secrets ne correspondent pas';
-      }
-      return null;
-    };
+  static String? validateConfirmSecretCode(String? value, String originalCode) {
+    if (value == null || value.isEmpty) {
+      return 'Veuillez confirmer votre code secret';
+    }
+    if (value != originalCode) {
+      return 'Les codes ne correspondent pas';
+    }
+    return null;
   }
 
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Veuillez entrer votre nom';
+    }
+    if (value.length < 2) {
+      return 'Le nom doit contenir au moins 2 caractères';
     }
     return null;
   }
@@ -72,3 +76,4 @@ class FormValidators {
     return null;
   }
 }
+
