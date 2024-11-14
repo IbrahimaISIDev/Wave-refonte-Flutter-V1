@@ -92,7 +92,7 @@ class TransferRepository {
     required String recipientPhone,
     required double amount,
     required DateTime scheduleDate,
-    required String scheduleTime,
+    required String scheduleTime, required String frequency,
   }) async {
     try {
       final response = await _dio.post(
@@ -100,6 +100,7 @@ class TransferRepository {
         data: {
           'telephone': recipientPhone,
           'montant': amount,
+          'frequence': frequency,
           'date_debut': scheduleDate.toIso8601String(),
           'heure_execution': scheduleTime,
         },

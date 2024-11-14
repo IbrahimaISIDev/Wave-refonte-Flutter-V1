@@ -49,7 +49,7 @@ class ScheduleTransferEvent extends TransferEvent {
     required this.amount,
     required this.startDate,
     required this.endDate,
-    required this.frequency,
+    required this.frequency, // weekly, daily, monthly
     required this.executionTime,
   });
 
@@ -66,3 +66,14 @@ class CancelTransferEvent extends TransferEvent {
   @override
   List<Object> get props => [transactionId, reason];
 }
+
+// class ScheduleTransferEvent extends TransferEvent {
+//   final ScheduledTransfer scheduledTransfer;
+
+//   const ScheduleTransferEvent({
+//     required this.scheduledTransfer,
+//   });
+
+//   @override
+//   List<Object> get props => [scheduledTransfer];
+// }

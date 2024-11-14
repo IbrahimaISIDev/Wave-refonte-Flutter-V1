@@ -133,40 +133,42 @@ class TransferBloc extends Bloc<TransferEvent, TransferState> {
   }
 
   Future<void> _scheduleTransfer(
-    ScheduleTransferEvent event,
-    Emitter<TransferState> emit,
-  ) async {
-    try {
-      emit(const TransferLoading());
-      final result = await _transferRepository.scheduleTransfer(
-        recipientPhone: event.recipientPhone,
-        amount: event.amount,
-        scheduleDate: event.startDate,
-        scheduleTime: event.executionTime,
-      );
+  ScheduleTransferEvent event,
+  Emitter<TransferState> emit,
+) async {
+  try {
+    emit(const TransferLoading());
+    final result = await _transferRepository.scheduleTransfer(
+      recipientPhone: event.recipientPhone,
+      amount: event.amount,
+      scheduleDate: event.startDate,
+      scheduleTime: event.executionTime,
+      frequency: event.frequency, // Add this line
+    );
 
-      final formattedDate = event.startDate.toString().split(' ')[0];
-      emit(TransferSuccess(
-        message: 'Transfert programmé de ${event.amount} FCFA vers ${event.recipientPhone} pour le $formattedDate à ${event.executionTime}',
-        transactionId: result.transactionId.toString(),
-        details: {
-          'transaction_id': result.transactionId,
-          'amount': result.amount,
-          'recipient': {
-            'firstName': result.recipient.firstName,
-            'lastName': result.recipient.lastName,
-            'phone': result.recipient.phone,
-          },
-          'schedule_date': event.startDate.toIso8601String(),
-          'execution_time': event.executionTime,
+    final formattedDate = event.startDate.toString().split(' ')[0];
+    emit(TransferSuccess(
+      message: 'Transfert programmé de ${event.amount} FCFA vers ${event.recipientPhone} pour le $formattedDate à ${event.executionTime}',
+      transactionId: result.transactionId.toString(),
+      details: {
+        'transaction_id': result.transactionId,
+        'amount': result.amount,
+        'recipient': {
+          'firstName': result.recipient.firstName,
+          'lastName': result.recipient.lastName,
+          'phone': result.recipient.phone,
         },
-        isScheduled: true,
-      ));
-    } catch (e) {
-      emit(TransferFailure(
-        error: _formatError(e),
-        details: e is DioException ? e.response?.data : null,
-      ));
-    }
+        'schedule_date': event.startDate.toIso8601String(),
+        'execution_time': event.executionTime,
+        'frequency': event.frequency, // Add this line
+      },
+      isScheduled: true,
+    ));
+  } catch (e) {
+    emit(TransferFailure(
+      error: _formatError(e),
+      details: e is DioException ? e.response?.data : null,
+    ));
   }
+}
 }

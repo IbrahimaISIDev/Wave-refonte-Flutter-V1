@@ -18,7 +18,7 @@ class Recipient {
   factory Recipient.fromJson(Map<String, dynamic> json) {
     return Recipient(
       firstName: json['prenom'] ?? '',
-      lastName: json['nom'] ?? '',
+      lastName: json['nom'] ?? '',  
       phone: json['telephone'] ?? '',
       isFavorite: json['is_favori'] ?? false,
     );
@@ -206,3 +206,21 @@ class TransferHistory {
     return 0.0;
   }
 }
+
+// class ScheduledTransfer {
+//   final String recipientPhone;
+//   final double amount;
+//   final String frequency;
+//   final DateTime startDate;
+//   final DateTime endDate;
+//   final String executionTime;
+
+//   ScheduledTransfer({
+//     required this.recipientPhone,
+//     required this.amount,
+//     required this.frequency,
+//     required this.startDate,
+//     required this.endDate,
+//     required this.executionTime,
+//   });
+// }

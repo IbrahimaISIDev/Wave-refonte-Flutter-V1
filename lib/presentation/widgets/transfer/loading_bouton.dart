@@ -20,11 +20,11 @@ class LoadingButton extends StatelessWidget {
       style: style,
       onPressed: isLoading ? null : onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: isLoading
             ? SizedBox(
-                height: 20,
-                width: 20,
+                height: 16,
+                width: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -35,7 +35,7 @@ class LoadingButton extends StatelessWidget {
             : Text(
                 text,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
