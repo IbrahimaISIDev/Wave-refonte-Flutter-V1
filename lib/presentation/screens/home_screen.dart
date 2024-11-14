@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildActionButton(
                 icon: Icons.qr_code,
                 label: 'Mon QR Code',
-                onTap: () => _showQRCode(context, state.user.numeroCompte ?? ''),
+                onTap: () => _showQRCode(context, state.user.numeroCompte),
               ),
             ),
             const SizedBox(width: HomeScreenStyles.smallSpacing),

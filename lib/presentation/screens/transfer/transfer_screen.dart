@@ -6,9 +6,9 @@ import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_state.dart';
 import 'package:wave_app/data/repositories/transfer_repository.dart';
 import 'package:wave_app/presentation/widgets/balance_card.dart';
-import 'package:wave_app/presentation/widgets/multiple_transfer_form.dart';
-import 'package:wave_app/presentation/widgets/scheduled_transfer_form.dart';
-import 'package:wave_app/presentation/widgets/transfer_form.dart';
+import 'package:wave_app/presentation/widgets/transfer/multiple_transfer_form.dart';
+import 'package:wave_app/presentation/widgets/transfer/scheduled_transfer_form.dart';
+import 'package:wave_app/presentation/widgets/transfer/transfer_form.dart';
 
 class TransferScreen extends StatefulWidget {
   const TransferScreen({super.key, String? recipientId});

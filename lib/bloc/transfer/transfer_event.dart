@@ -1,3 +1,4 @@
+// transfer_event.dart
 import 'package:equatable/equatable.dart';
 
 abstract class TransferEvent extends Equatable {
@@ -6,6 +7,8 @@ abstract class TransferEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class LoadTransferHistoryEvent extends TransferEvent {}
 
 class PerformTransferEvent extends TransferEvent {
   final String recipientPhone;
@@ -53,9 +56,6 @@ class ScheduleTransferEvent extends TransferEvent {
   @override
   List<Object> get props => [recipientPhone, amount, startDate, endDate, frequency, executionTime];
 }
-
-
-class LoadTransferHistoryEvent extends TransferEvent {}
 
 class CancelTransferEvent extends TransferEvent {
   final int transactionId;

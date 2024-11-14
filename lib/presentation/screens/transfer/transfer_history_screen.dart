@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
-import 'package:wave_app/bloc/transfer/transfer_event.dart';
+import 'package:wave_app/bloc/transfer/transfer_event.dart' as transfer_event;
+import 'package:wave_app/bloc/transfer/transfer_history_bloc.dart' as transfer_history_bloc;
 import 'package:wave_app/bloc/transfer/transfer_state.dart';
-import 'package:wave_app/data/models/transfer_model.dart';
 
 class TransferHistoryScreen extends StatefulWidget {
   const TransferHistoryScreen({super.key});
@@ -18,7 +18,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<TransferBloc>().add(LoadTransferHistoryEvent());
+    context.read<TransferBloc>().add(transfer_event.LoadTransferHistoryEvent());
   }
 
   @override
@@ -40,7 +40,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
         builder: (context, state) {
           if (state is TransferLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is TransferHistoryLoaded) {
+          } else if (state is transfer_history_bloc.TransferHistoryLoaded) {
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: state.transfers.length,
@@ -68,7 +68,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                                 color: Colors.black87,
                               ),
                             ),
-                            _buildStatusChip(transfer.status ?? 'Unknown'), // Gérer les valeurs null
+                            _buildStatusChip(transfer.status),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -78,9 +78,9 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                             color: Colors.black54,
                           ),
                         ),
-                        if (transfer.createdAt != null) // Gérer les valeurs null
+                        if (transfer.createdAt != null)
                           Text(
-                            'Date: ${_formatDate(transfer.createdAt!)}', // Utiliser ! pour accéder à la valeur non nullable
+                            'Date: ${_formatDate(transfer.createdAt!)}',
                             style: GoogleFonts.poppins(
                               color: Colors.black54,
                             ),
@@ -91,7 +91,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                 );
               },
             );
-          } else if (state is TransferError) {
+          } else if (state is TransferFailure) {
             return Center(
               child: Text(
                 state.message ?? 'Une erreur est survenue',
@@ -107,7 +107,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
 
   Widget _buildStatusChip(String? status) {
     Color color;
-    String displayStatus = status ?? 'Unknown'; // Gérer les valeurs null
+    String displayStatus = status ?? 'Unknown';
     switch (displayStatus.toLowerCase()) {
       case 'completed':
         color = Colors.green;

@@ -1,47 +1,41 @@
-import 'package:wave_app/data/models/transfer_model.dart';
-
 abstract class TransferState {
-  const TransferState();
+  final bool isLoading;
+  
+  const TransferState({this.isLoading = false});
+
+  get transfers => null;
 }
 
-class TransferInitial extends TransferState {}
+class TransferInitial extends TransferState {
+  const TransferInitial() : super(isLoading: false);
+}
 
-class TransferLoading extends TransferState {}
+class TransferLoading extends TransferState {
+  const TransferLoading() : super(isLoading: true);
+}
 
 class TransferSuccess extends TransferState {
-  final TransferResult transferResult;
+  final String message;
+  final String transactionId;
+  final Map<String, dynamic> details;
+  final bool isScheduled;
 
-  const TransferSuccess(this.transferResult);
-}
-
-class MultipleTransferSuccess extends TransferState {
-  final MultipleTransferResult multipleTransferResult;
-
-  const MultipleTransferSuccess(this.multipleTransferResult);
+  const TransferSuccess({
+    required this.message,
+    required this.transactionId,
+    required this.details,
+    this.isScheduled = false,
+  }) : super(isLoading: false);
 }
 
 class TransferFailure extends TransferState {
   final String error;
+  final Map<String, dynamic>? details;
 
-  const TransferFailure(this.error);
+  const TransferFailure({
+    required this.error,
+    this.details,
+  }) : super(isLoading: false);
+
+  get message => null;
 }
-
-class TransferScheduled extends TransferState {
-  final dynamic data;
-
-  const TransferScheduled(this.data);
-}
-
-class TransferHistoryLoaded extends TransferState {
-  final List<TransferResult> transfers;
-
-  const TransferHistoryLoaded(this.transfers);
-}
-
-class TransferError extends TransferState {
-  final String? message;
-
-  const TransferError([this.message]);
-}
-
-class TransferCancelled extends TransferState {}
