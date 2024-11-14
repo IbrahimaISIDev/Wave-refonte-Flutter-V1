@@ -1,187 +1,135 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wave_app/data/models/user_model.dart';
+import 'package:wave_app/services/dio_service.dart';
 
 class AuthRepository {
-  final Dio _dio;
-  static const String _tokenKey = 'auth_token';
+  late final Dio _dio;
   static const String _baseUrl = 'http://192.168.6.82:3000/api';
 
-  AuthRepository()
-      : _dio = Dio(
-          BaseOptions(
-            baseUrl: _baseUrl,
-            connectTimeout: const Duration(seconds: 5), // Délai de connexion
-            receiveTimeout: const Duration(seconds: 20),  // Augmenter à 20 secondes
-
-            contentType: 'application/json',
-            headers: {
-              'Accept': 'application/json',
-            },
-            validateStatus: (status) =>
-                true, // Accepter tous les status pour mieux gérer les erreurs
-          ),
-        );
+  AuthRepository() {
+    _dio = DioService.instance.getDio(addAuthHeader: false);
+  }
 
   // Initialiser le token s'il existe déjà
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_tokenKey);
+    final token = prefs.getString(DioService.tokenKey);
     if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
+      await DioService.instance.setAuthToken(token);
     }
   }
 
   Future<UserModel> login({required String phone, required String code}) async {
-  try {
-    // Debug: Afficher les informations de la requête
-    print('=== Début de la requête de connexion ===');
-    print('URL: $_baseUrl/login');
-    print('Données envoyées: { telephone: $phone, code: $code }');
-    print('Headers: ${_dio.options.headers}');
-
-    // Vérifier d'abord si le serveur est accessible
     try {
-      await _dio.get('/health-check');
+      print('=== Début de la requête de connexion ===');
+      print('URL: $_baseUrl/login');
+      print('Données envoyées: { telephone: $phone, code: $code }');
+
+      // Vérifier d'abord si le serveur est accessible
+      try {
+        await _dio.get('/health-check');
+      } catch (e) {
+        print('Erreur de connexion au serveur: $e');
+        throw 'Le serveur n\'est pas accessible. Vérifiez l\'URL ou votre connexion internet.';
+      }
+
+      // Effectuer la requête de login
+      final response = await _dio.post(
+        '/login',
+        data: {
+          'telephone': phone,
+          'code': code,
+        },
+      );
+
+      print('Status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == null) {
+        throw 'Pas de réponse du serveur';
+      }
+
+      switch (response.statusCode) {
+        case 200:
+          try {
+            if (response.data == null) {
+              throw 'Réponse vide du serveur';
+            }
+
+            final data = response.data as Map<String, dynamic>;
+
+            if (!data.containsKey('access_token')) {
+              print('Structure de la réponse: $data');
+              throw 'Token manquant dans la réponse';
+            }
+
+            if (!data.containsKey('user')) {
+              print('Structure de la réponse: $data');
+              throw 'Données utilisateur manquantes dans la réponse';
+            }
+
+            final token = data['access_token'] as String;
+            final userData = data['user'] as Map<String, dynamic>;
+
+            // Sauvegarder le token via DioService
+            await DioService.instance.setAuthToken(token);
+
+            return UserModel.fromJson(userData);
+          } catch (e) {
+            print('Erreur lors du traitement de la réponse: $e');
+            throw 'Erreur lors du traitement de la réponse: $e';
+          }
+
+        case 400:
+          throw _handleAuthError(response.data?['message'] ?? 'Données invalides');
+        case 401:
+          throw _handleAuthError(response.data?['message'] ?? 'Identifiants incorrects');
+        case 403:
+          throw _handleAuthError(response.data?['message'] ?? 'Accès refusé');
+        case 404:
+          throw 'Service non trouvé. URL incorrecte?';
+        case 500:
+          throw 'Erreur serveur interne';
+        default:
+          throw 'Erreur ${response.statusCode}: ${response.data?['message'] ?? 'Erreur inconnue'}';
+      }
+    } on DioException catch (e) {
+      print('=== Erreur Dio détectée ===');
+      print('Type: ${e.type}');
+      print('Message: ${e.message}');
+      print('Error: ${e.error}');
+      print('Response: ${e.response?.data}');
+
+      throw _handleDioError(e);
     } catch (e) {
-      print('Erreur de connexion au serveur: $e');
-      throw 'Le serveur n\'est pas accessible. Vérifiez l\'URL ou votre connexion internet.';
+      print('=== Erreur générale ===');
+      print(e.toString());
+      throw 'Erreur inattendue: ${e.toString()}';
+    } finally {
+      print('=== Fin de la requête de connexion ===');
     }
-
-    // Effectuer la requête de login
-    final response = await _dio.post(
-      '$_baseUrl/login',
-      data: {
-        'telephone': phone,
-        'code': code,
-      },
-    );
-
-    // Debug: Afficher la réponse
-    print('Status code: ${response.statusCode}');
-    print('Response headers: ${response.headers}');
-    print('Response data: ${response.data}');
-
-    // Vérification du status code
-    if (response.statusCode == null) {
-      throw 'Pas de réponse du serveur';
-    }
-
-    switch (response.statusCode) {
-      case 200:
-        try {
-          if (response.data == null) {
-            throw 'Réponse vide du serveur';
-          }
-
-          final data = response.data as Map<String, dynamic>;
-
-          // Vérification des champs requis
-          if (!data.containsKey('access_token')) {
-            print('Structure de la réponse: $data');
-            throw 'Token manquant dans la réponse';
-          }
-
-          if (!data.containsKey('user')) {
-            print('Structure de la réponse: $data');
-            throw 'Données utilisateur manquantes dans la réponse';
-          }
-
-          final token = data['access_token'] as String? ?? '';  // Assurer que token n'est pas null
-          final userData = data['user'] as Map<String, dynamic>;
-
-          // Sauvegarde du token
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(_tokenKey, token);
-
-          // Mise à jour des headers
-          _dio.options.headers['Authorization'] = 'Bearer $token';
-
-          return UserModel.fromJson(userData);
-        } catch (e) {
-          print('Erreur lors du traitement de la réponse: $e');
-          throw 'Erreur lors du traitement de la réponse: $e';
-        }
-
-      case 400:
-        throw response.data?['message'] ?? 'Données invalides';
-      case 401:
-        throw response.data?['message'] ?? 'Identifiants incorrects';
-      case 403:
-        throw response.data?['message'] ?? 'Accès refusé';
-      case 404:
-        throw 'Service non trouvé. URL incorrecte?';
-      case 500:
-        throw 'Erreur serveur interne';
-      default:
-        throw 'Erreur ${response.statusCode}: ${response.data?['message'] ?? 'Erreur inconnue'}';
-    }
-  } on DioException catch (e) {
-    print('=== Erreur Dio détectée ===');
-    print('Type: ${e.type}');
-    print('Message: ${e.message}');
-    print('Error: ${e.error}');
-    print('Response: ${e.response?.data}');
-
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-        throw 'Délai de connexion dépassé';
-      case DioExceptionType.sendTimeout:
-        throw 'Délai d\'envoi dépassé';
-      case DioExceptionType.receiveTimeout:
-        throw 'Délai de réception dépassé';
-      case DioExceptionType.badCertificate:
-        throw 'Problème de certificat SSL';
-      case DioExceptionType.badResponse:
-        final response = e.response;
-        if (response != null) {
-          print('Bad response data: ${response.data}');
-          throw response.data?['message'] ?? 'Erreur de réponse du serveur';
-        }
-        throw 'Réponse invalide du serveur';
-      case DioExceptionType.connectionError:
-        throw 'Erreur de connexion. Vérifiez votre connexion internet et l\'URL du serveur';
-      case DioExceptionType.cancel:
-        throw 'Requête annulée';
-      default:
-        throw 'Erreur réseau: ${e.message ?? 'Erreur inconnue'}';
-    }
-  } catch (e) {
-    print('=== Erreur générale ===');
-    print(e.toString());
-    throw 'Erreur inattendue: ${e.toString()}';
-  } finally {
-    print('=== Fin de la requête de connexion ===');
   }
-}
 
-
-Future<void> logout() async {
-  try {
-    // Envoyer la requête de déconnexion au serveur
-    final response = await _dio.post('/logout');
-    if (response.statusCode == 200) {
-      print('Déconnexion réussie.');
-    } else {
-      print('Erreur lors de la déconnexion: ${response.data}');
+  Future<void> logout() async {
+    try {
+      final response = await _dio.post('/logout');
+      if (response.statusCode == 200) {
+        print('Déconnexion réussie.');
+      } else {
+        print('Erreur lors de la déconnexion: ${response.data}');
+      }
+    } catch (e) {
+      print('Erreur lors de la déconnexion: $e');
+    } finally {
+      await DioService.instance.clearAuthToken();
     }
-  } catch (e) {
-    print('Erreur lors de la déconnexion: $e');
-  } finally {
-    // Nettoyage des données locales même en cas d'erreur
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    _dio.options.headers.remove('Authorization');
   }
-}
-
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString(_tokenKey);
-
-      if (token == null) {
+      if (DioService.instance.authToken == null) {
         return null;
       }
 
@@ -191,12 +139,12 @@ Future<void> logout() async {
       }
       return null;
     } catch (e) {
+      print('Erreur lors de la récupération de l\'utilisateur courant: $e');
       return null;
     }
   }
 
   String _handleAuthError(String message) {
-    // Ajout de plus de cas spécifiques
     switch (message.toLowerCase()) {
       case 'invalid_credentials':
       case 'identifiants invalides':
@@ -214,7 +162,6 @@ Future<void> logout() async {
       case 'invalid_phone':
         return 'Format du numéro de téléphone invalide';
       default:
-        // Log l'erreur non gérée pour analyse future
         print('Erreur non gérée: $message');
         return 'Erreur de connexion: $message';
     }
@@ -227,8 +174,8 @@ Future<void> logout() async {
       case DioExceptionType.receiveTimeout:
         return 'Erreur de connexion. Veuillez vérifier votre connexion internet';
       case DioExceptionType.badResponse:
-        if (e.response != null) {
-          return 'Erreur ${e.response!.statusCode}: ${e.response!.data}';
+        if (e.response?.data?['message'] != null) {
+          return _handleAuthError(e.response!.data['message']);
         }
         return 'Erreur de réponse du serveur';
       case DioExceptionType.connectionError:
@@ -236,17 +183,75 @@ Future<void> logout() async {
       case DioExceptionType.cancel:
         return 'Requête annulée par l\'utilisateur';
       default:
-        return 'Erreur inconnue';
+        return 'Erreur inconnue: ${e.message}';
     }
   }
 
-  verifyOtp({required String phone, required String otp}) {}
+  Future<UserModel> verifyOtp({required String phone, required String otp}) async {
+    try {
+      final response = await _dio.post(
+        '/verify-otp',
+        data: {
+          'telephone': phone,
+          'otp': otp,
+        },
+      );
 
-  setSecretCode({required String phone, required String secretCode}) {}
+      if (response.statusCode == 200) {
+        return UserModel.fromJson(response.data['user']);
+      } else {
+        throw _handleAuthError(response.data?['message'] ?? 'Erreur de vérification OTP');
+      }
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
 
-  register(
-      {required String name,
-      required String phone,
-      required String email,
-      required String password}) {}
+  Future<UserModel> setSecretCode({
+    required String phone,
+    required String secretCode,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/set-secret-code',
+        data: {
+          'telephone': phone,
+          'code_secret': secretCode,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return UserModel.fromJson(response.data['user']);
+      } else {
+        throw _handleAuthError(response.data?['message'] ?? 'Erreur de configuration du code secret');
+      }
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<void> register({
+    required String name,
+    required String phone,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/register',
+        data: {
+          'nom': name,
+          'telephone': phone,
+          'email': email,
+          'password': password,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw _handleAuthError(response.data?['message'] ?? 'Erreur d\'inscription');
+      }
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
 }

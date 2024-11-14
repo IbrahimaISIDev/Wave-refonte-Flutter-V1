@@ -97,7 +97,7 @@ class _TransferScreenState extends State<TransferScreen> {
                   curve: Curves.easeInOut,
                 );
               },
-              selectedItemColor: Colors.blue,
+              selectedItemColor: Colors.purple,
               unselectedItemColor: Colors.grey,
               items: const [
                 BottomNavigationBarItem(

@@ -1,78 +1,68 @@
-// Gardez une seule classe d'événement qui hérite de TransferEvent
-import 'package:wave_app/data/models/transfer_model.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class TransferEvent {}
+abstract class TransferEvent extends Equatable {
+  const TransferEvent();
 
-class PerformTransferEvent extends TransferEvent {
-  final String recipient;
-  final double amount;
-
-  PerformTransferEvent(this.recipient, this.amount);
+  @override
+  List<Object> get props => [];
 }
 
-class PerformMultipleTransferEvent extends TransferEvent {
-  final List<String> recipients;
+class PerformTransferEvent extends TransferEvent {
+  final String recipientPhone;
   final double amount;
 
-  PerformMultipleTransferEvent(this.recipients, this.amount);
+  const PerformTransferEvent({
+    required this.recipientPhone,
+    required this.amount,
+  });
+
+  @override
+  List<Object> get props => [recipientPhone, amount];
+}
+
+class PerformMultipleTransfersEvent extends TransferEvent {
+  final List<String> recipientPhones;
+  final double amount;
+
+  const PerformMultipleTransfersEvent({
+    required this.recipientPhones,
+    required this.amount,
+  });
+
+  @override
+  List<Object> get props => [recipientPhones, amount];
 }
 
 class ScheduleTransferEvent extends TransferEvent {
-  final String recipient;
+  final String recipientPhone;
   final double amount;
-  final TransferSchedule schedule;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String frequency;
+  final String executionTime;
 
-  ScheduleTransferEvent(this.recipient, this.amount, this.schedule);
+  const ScheduleTransferEvent({
+    required this.recipientPhone,
+    required this.amount,
+    required this.startDate,
+    required this.endDate,
+    required this.frequency,
+    required this.executionTime,
+  });
+
+  @override
+  List<Object> get props => [recipientPhone, amount, startDate, endDate, frequency, executionTime];
 }
+
+
+class LoadTransferHistoryEvent extends TransferEvent {}
 
 class CancelTransferEvent extends TransferEvent {
   final int transactionId;
   final String reason;
 
-  CancelTransferEvent(this.transactionId, this.reason);
+  const CancelTransferEvent(this.transactionId, this.reason);
+
+  @override
+  List<Object> get props => [transactionId, reason];
 }
-
-// Modification ici : Assurez-vous que la classe LoadTransferHistoryEvent hérite de TransferEvent
-class LoadTransferHistoryEvent extends TransferEvent {
-  final int page;
-  final int limit;
-
-  LoadTransferHistoryEvent({this.page = 1, this.limit = 10});
-}
-
-// Si vous n'avez pas besoin de GetTransferHistoryEvent, supprimez-la
-// class GetTransferHistoryEvent {
-//   final int page;
-//   final int limit;
-//
-//   GetTransferHistoryEvent({this.page = 1, this.limit = 10});
-// }
-
-
-// // lib/bloc/transfer/transfer_event.dart
-// import 'package:equatable/equatable.dart';
-
-// abstract class TransferEvent extends Equatable {
-//   @override
-//   List<Object> get props => [];
-// }
-
-// class CreateTransferEvent extends TransferEvent {
-//   final String recipientId;
-//   final double amount;
-
-//   CreateTransferEvent({required this.recipientId, required this.amount});
-
-//   @override
-//   List<Object> get props => [recipientId, amount];
-// }
-
-// class CreateMultipleTransferEvent extends TransferEvent {
-//   final List<Map<String, dynamic>> transfers; // Removed the nullable (?) operator
-
-//   CreateMultipleTransferEvent({
-//     required this.transfers, required List<String> recipients, required double amount, // Made transfers required
-//   });
-// }
-
-// class GetTransferHistoryEvent extends TransferEvent {}

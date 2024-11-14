@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_event.dart';
-import 'package:wave_app/data/models/transfer_model.dart';
+import 'package:wave_app/utils/styles.dart';
 
 class ScheduledTransferForm extends StatefulWidget {
   const ScheduledTransferForm({super.key});
@@ -14,79 +14,163 @@ class ScheduledTransferForm extends StatefulWidget {
 
 class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
   final _formKey = GlobalKey<FormState>();
-  late String _recipient;
-  late double _amount;
-  late TransferSchedule _schedule;
+  final _recipientController = TextEditingController();
+  final _amountController = TextEditingController();
+  DateTime? _selectedDate;
+  Duration? _frequencyDuration;
 
-  void _submitScheduledTransfer() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      context.read<TransferBloc>().add(ScheduleTransferEvent(_recipient, _amount, _schedule));
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now().add(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Numéro de téléphone du destinataire',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir un numéro de téléphone';
-              }
-              return null;
-            },
-            onSaved: (value) => _recipient = value!,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Montant à transférer',
-            ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir un montant';
-              }
-              if (double.tryParse(value) == null) {
-                return 'Montant invalide';
-              }
-              return null;
-            },
-            onSaved: (value) => _amount = double.parse(value!),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Fréquence du transfert (jours)',
-            ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir une fréquence';
-              }
-              if (int.tryParse(value) == null) {
-                return 'Fréquence invalide';
-              }
-              return null;
-            },
-            onSaved: (value) => _schedule = TransferSchedule(
-              nextTransferDate: DateTime.now().add(Duration(days: int.parse(value!))),
-              frequency: Duration(days: int.parse(value)),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _submitScheduledTransfer,
-            child: const Text('Planifier le transfert'),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Transfert Programmé',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _recipientController,
+                decoration: TransferFormStyles.getInputDecoration(
+                  labelText: 'Numéro du bénéficiaire',
+                  icon: Icons.person,
+                ),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Numéro requis' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                decoration: TransferFormStyles.getInputDecoration(
+                  labelText: 'Montant',
+                  icon: Icons.attach_money,
+                  hintText: '0.00 FCFA',
+                ),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Montant requis' : null,
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.purple.shade200),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.calendar_today, color: Colors.purple.shade700),
+                      const SizedBox(width: 10),
+                      Text(
+                        _selectedDate == null
+                            ? 'Sélectionner une date'
+                            : 'Date: ${_selectedDate.toString().split(' ')[0]}',
+                        style: TextStyle(
+                          color: Colors.purple.shade700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: TransferFormStyles.getInputDecoration(
+                  labelText: 'Fréquence (jours)',
+                  icon: Icons.repeat,
+                ),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) return 'Fréquence requise';
+                  if (int.tryParse(value!) == null) return 'Nombre invalide';
+                  return null;
+                },
+                onSaved: (value) {
+                  _frequencyDuration = Duration(days: int.parse(value!));
+                },
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                style: TransferFormStyles.primaryButtonStyle,
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _formKey.currentState?.save();
+                    final recipientPhone = _recipientController.text;
+                    final amount =
+                        double.tryParse(_amountController.text) ?? 0.0;
+                    final startDate = _selectedDate;
+                    final frequency = _frequencyDuration;
+
+                    if (startDate != null && frequency != null) {
+                      // Calculer la date de fin
+                      final endDate = startDate.add(frequency);
+
+                      // Envoi de l'événement avec les dates sous forme d'objet DateTime
+                      context.read<TransferBloc>().add(
+                            ScheduleTransferEvent(
+                              recipientPhone: recipientPhone,
+                              amount: amount,
+                              startDate:
+                                  startDate, // Utilisation de DateTime directement
+                              endDate:
+                                  endDate, // Utilisation de DateTime directement
+                              frequency: frequency.inDays
+                                  .toString(), // On conserve ici le nombre de jours sous forme de String
+                              executionTime: '08:00',
+                            ),
+                          );
+                    }
+                  }
+                },
+                child: const Text(
+                  'Programmer le transfert',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

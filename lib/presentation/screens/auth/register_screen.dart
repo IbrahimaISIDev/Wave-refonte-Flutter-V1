@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Pour la manipulation des fichiers
+import 'package:image_picker/image_picker.dart'; // Pour sélectionner des images
 import 'package:provider/provider.dart';
 import 'package:wave_app/data/models/user_model.dart';
 import 'package:wave_app/providers/auth_provider.dart';
 import 'package:wave_app/utils/validators.dart';
-import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart'; // Pour gérer les chemins de fichiers
+import 'package:path/path.dart' as path; // Pour les opérations sur les chemins
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen(
@@ -29,13 +30,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _addressController = TextEditingController();
   final _birthdateController = TextEditingController();
 
-  File? _profileImage;
-  final _picker = ImagePicker();
+  File? _profileImage; // Stocke l'image de profil sélectionnée
+  final _picker = ImagePicker(); // Instance d'ImagePicker pour sélectionner des images
   DateTime? _selectedDate;
   String _selectedGender = 'Non spécifié';
 
-  bool _obscureSecretCode = true;
-  bool _obscureConfirmSecretCode = true;
   bool _isLoading = false;
   bool _acceptTerms = false;
 
@@ -43,22 +42,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
-        maxWidth: 1000,
-        maxHeight: 1000,
-        imageQuality: 85,
+        maxWidth: 1000, // Limite la largeur maximale
+        maxHeight: 1000, // Limite la hauteur maximale
+        imageQuality: 85, // Définit la qualité de l'image (85%)
       );
 
       if (pickedFile != null) {
+        // Création du dossier temporaire
+        Directory tempDir = await getTemporaryDirectory();
+        String tempPath = tempDir.path;
+
+        File imageFile = File(pickedFile.path);
+
+        // Génération d'un nom unique pour l'image
+        String uniqueFileName =
+            'profile_${DateTime.now().millisecondsSinceEpoch}${path.extension(pickedFile.path)}';
+
+        // Copie de l'image dans le dossier temporaire
+        final File localImage =
+            await imageFile.copy('$tempPath/$uniqueFileName');
+
         setState(() {
-          _profileImage = File(pickedFile.path);
+          _profileImage = localImage;
         });
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Erreur lors de la sélection de l\'image')),
-      );
+      // Gestion des erreurs
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'Erreur lors de la sélection de l\'image: ${e.toString()}')));
     }
   }
 
@@ -103,41 +115,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // void _showImageSourceDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+  //         title: const Text('Choisir une photo de profil',
+  //             style: TextStyle(color: Colors.white)),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             ListTile(
+  //               leading: const Icon(Icons.camera_alt, color: Colors.white),
+  //               title: const Text('Prendre une photo',
+  //                   style: TextStyle(color: Colors.white)),
+  //               onTap: () {
+  //                 Navigator.pop(context);
+  //                 _pickImage(ImageSource.camera);
+  //               },
+  //             ),
+  //             ListTile(
+  //               leading: const Icon(Icons.photo_library, color: Colors.white),
+  //               title: const Text('Choisir depuis la galerie',
+  //                   style: TextStyle(color: Colors.white)),
+  //               onTap: () {
+  //                 Navigator.pop(context);
+  //                 _pickImage(ImageSource.gallery);
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   void _showImageSourceDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
-          title: const Text('Choisir une photo de profil',
-              style: TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.white),
-                title: const Text('Prendre une photo',
-                    style: TextStyle(color: Colors.white)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.white),
-                title: const Text('Choisir depuis la galerie',
-                    style: TextStyle(color: Colors.white)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        // ... Configuration du dialogue
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Option Camera
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Prendre une photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            // Option Galerie
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choisir depuis la galerie'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -481,20 +527,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
         String formattedDate = _birthdateController.text;
 
         // Vérifier si l'image est valide (format image)
-        if (_profileImage != null) {
-          final mimeType = lookupMimeType(_profileImage!.path);
-          if (mimeType == null || !mimeType.startsWith('image/')) {
-            // Afficher une erreur si ce n'est pas une image valide
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Le fichier sélectionné n\'est pas une image valide.'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            setState(() => _isLoading = false);
-            return;
-          }
+        // if (_profileImage != null) {
+        //   final mimeType = lookupMimeType(_profileImage!.path);
+        //   if (mimeType == null || !mimeType.startsWith('image/')) {
+        //     // Afficher une erreur si ce n'est pas une image valide
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(
+        //         content:
+        //             Text('Le fichier sélectionné n\'est pas une image valide.'),
+        //         backgroundColor: Colors.red,
+        //       ),
+        //     );
+        //     setState(() => _isLoading = false);
+        //     return;
+        //   }
+        // }
+        if (_profileImage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Veuillez sélectionner une photo de profil'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
         }
 
         final user = UserModel.forRegistration(
@@ -507,6 +562,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           sexe: sexe,
           photo: _profileImage?.path, // Ajouter le chemin de l'image
         );
+        // Suppression de l'image temporaire après l'inscription réussie
+        //await _profileImage!.delete();
 
         // Envoi de l'image avec la requête d'inscription
         final success = await Provider.of<AuthProvider>(context, listen: false)

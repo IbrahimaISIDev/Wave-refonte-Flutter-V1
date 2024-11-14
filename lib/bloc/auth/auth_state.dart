@@ -10,12 +10,6 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class AuthAuthenticated extends AuthState {
-  final UserModel user;
-  
-  AuthAuthenticated(this.user);
-}
-
 class AuthUnauthenticated extends AuthState {}
 
 class AuthOtpVerified extends AuthState {
@@ -25,6 +19,7 @@ class AuthOtpVerified extends AuthState {
 }
 
 class AuthNeedsSecretCode extends AuthState {
+  @override
   final UserModel user;
   
   AuthNeedsSecretCode(this.user);
@@ -41,4 +36,14 @@ class AuthSuccess extends AuthState {
   final UserModel user;
 
   AuthSuccess(this.user);
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AuthSuccess &&
+          runtimeType == other.runtimeType &&
+          user == other.user;
+
+  @override
+  int get hashCode => user.hashCode;
 }

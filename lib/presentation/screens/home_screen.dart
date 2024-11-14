@@ -12,6 +12,7 @@ import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
+import 'package:wave_app/utils/HomeScreenStyles.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,19 +35,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   int _selectedIndex = 0;
 
-  get recentTransactions => null;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Charger les transactions au démarrage
     context.read<TransactionBloc>().add(LoadTransactions());
   }
 
@@ -59,43 +51,52 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildHomeScreenContent(),
-          const TransferHistoryScreen(),
-          const ProfileScreen(),
-        ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        navigationBarTheme: HomeScreenStyles.navigationBarTheme,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Historique',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+      child: Scaffold(
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildHomeScreenContent(),
+            const TransferHistoryScreen(),
+            const ProfileScreen(),
+          ],
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
       ),
+    );
+  }
+
+  NavigationBar _buildBottomNavigationBar() {
+    return NavigationBar(
+      selectedIndex: _selectedIndex,
+      onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Accueil',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.history_outlined),
+          selectedIcon: Icon(Icons.history),
+          label: 'Historique',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person_outline),
+          selectedIcon: Icon(Icons.person),
+          label: 'Profil',
+        ),
+      ],
     );
   }
 
   Widget _buildHomeScreenContent() {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        if (state is AuthAuthenticated) {
+        if (state is AuthSuccess) {
           return CustomScrollView(
             slivers: [
               _buildAppBar(state),
@@ -111,37 +112,17 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildAppBar(AuthAuthenticated state) {
+  Widget _buildAppBar(AuthSuccess state) {
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).primaryColor.withOpacity(0.9),
-                Theme.of(context).primaryColor.withOpacity(0.6),
-              ],
-            ),
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
+          decoration: HomeScreenStyles.getHeaderGradient(context),
           child: SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: HomeScreenStyles.defaultScreenPadding,
               child: _buildUserInfo(state),
             ),
           ),
@@ -150,35 +131,50 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildUserInfo(AuthAuthenticated state) {
+  Widget _buildUserInfo(AuthSuccess state) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 40),
+            const SizedBox(height: HomeScreenStyles.largeSpacing),
             Text(
               'Bonjour, ${state.user.prenom}',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
+              style: HomeScreenStyles.greetingTextStyle,
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: HomeScreenStyles.smallSpacing),
             GestureDetector(
-              onTap: () =>
-                  setState(() => _isBalanceVisible = !_isBalanceVisible),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _buildBalanceDisplay(state.user.solde),
-              ),
+              onTap: () => setState(() => _isBalanceVisible = !_isBalanceVisible),
+              child: _buildBalance(state.user.solde),
             ),
           ],
         ),
         _buildProfileAvatar(state.user.photo),
       ],
+    );
+  }
+
+  Widget _buildBalance(double balance) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _isBalanceVisible
+                ? currencyFormat.format(balance)
+                : '• • • • • • • • • •',
+            style: HomeScreenStyles.balanceTextStyle,
+          ),
+          const SizedBox(width: HomeScreenStyles.smallSpacing),
+          Icon(
+            _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.white.withOpacity(0.8),
+            size: 20,
+          ),
+        ],
+      ),
     );
   }
 
@@ -188,62 +184,35 @@ class _HomeScreenState extends State<HomeScreen>
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedIndex = 2; // Switch to profile tab
-          });
-        },
-        child: CircleAvatar(
-          radius: 26,
-          backgroundColor: Colors.white.withOpacity(0.2),
-          backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-          child: photoUrl == null
-              ? const Icon(Icons.person, color: Colors.white, size: 24)
-              : null,
+        onTap: () => setState(() => _selectedIndex = 2),
+        child: Container(
+          decoration: HomeScreenStyles.avatarDecoration,
+          child: CircleAvatar(
+            radius: HomeScreenStyles.avatarSize / 2,
+            backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+            child: photoUrl == null
+                ? const Icon(Icons.person, color: Colors.white)
+                : null,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildBalanceDisplay(double balance) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          _isBalanceVisible
-              ? currencyFormat.format(balance)
-              : '• • • • • • • • • •',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Icon(
-          _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-          color: Colors.white.withOpacity(0.8),
-          size: 20,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(AuthAuthenticated state) {
+  Widget _buildActionButtons(AuthSuccess state) {
     return SliverToBoxAdapter(
       child: Container(
-        margin: const EdgeInsets.all(20),
+        margin: const EdgeInsets.all(HomeScreenStyles.defaultSpacing),
         child: Row(
           children: [
             Expanded(
               child: _buildActionButton(
                 icon: Icons.qr_code,
                 label: 'Mon QR Code',
-                onTap: () =>
-                    _showQRCode(context, state.user.numeroCompte ?? ''),
+                onTap: () => _showQRCode(context, state.user.numeroCompte ?? ''),
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: HomeScreenStyles.smallSpacing),
             Expanded(
               child: _buildActionButton(
                 icon: Icons.qr_code_scanner,
@@ -267,24 +236,14 @@ class _HomeScreenState extends State<HomeScreen>
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Ink(
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                spreadRadius: 1,
-                blurRadius: 10,
-              ),
-            ],
-          ),
+          decoration: HomeScreenStyles.transactionItemDecoration,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 32, color: Theme.of(context).primaryColor),
-              const SizedBox(height: 8),
+              const SizedBox(height: HomeScreenStyles.smallSpacing),
               Text(
                 label,
                 style: TextStyle(
@@ -299,141 +258,52 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showQRCode(BuildContext context, String qrData) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: 400,
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          children: [
-            _buildModalHeader(),
-            const SizedBox(height: 30),
-            QrImageView(
-              data: qrData,
-              version: QrVersions.auto,
-              size: 200.0,
-              eyeStyle: QrEyeStyle(
-                eyeShape: QrEyeShape.square,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(height: 30),
-            const Text(
-              'Scannez ce code pour m\'envoyer de l\'argent',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _startScanning() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.8,
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          children: [
-            _buildModalHeader(),
-            const SizedBox(height: 30),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: MobileScanner(
-                    controller: _scannerController,
-                    onDetect: (capture) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      for (final barcode in barcodes) {
-                        debugPrint('Code scanné: ${barcode.rawValue}');
-                        // Handle scanned QR code
-                        if (barcode.rawValue != null) {
-                          Navigator.pop(context);
-                          // Navigate to transfer screen with scanned data
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TransferScreen(
-                                recipientId: barcode.rawValue,
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildQuickActions() {
+    final List<Map<String, dynamic>> actions = [
+      {
+        'icon': Icons.send,
+        'label': 'Transfert',
+        'color': Theme.of(context).primaryColor,
+        'onTap': () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TransferScreen()),
+            ),
+      },
+      {
+        'icon': Icons.account_balance_wallet,
+        'label': 'Recharger',
+        'color': Colors.green,
+        'onTap': () {},
+      },
+      {
+        'icon': Icons.receipt_long,
+        'label': 'Factures',
+        'color': Colors.orange,
+        'onTap': () {},
+      },
+      {
+        'icon': Icons.more_horiz,
+        'label': 'Plus',
+        'color': Colors.purple,
+        'onTap': () {},
+      },
+    ];
+
     return SliverToBoxAdapter(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
+        margin: const EdgeInsets.symmetric(
+          horizontal: HomeScreenStyles.defaultSpacing,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildQuickActionButton(
-              icon: Icons.send,
-              label: 'Envoyer',
-              color: Theme.of(context).primaryColor,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TransferScreen(),
-                ),
-              ),
-            ),
-            _buildQuickActionButton(
-              icon: Icons.account_balance_wallet,
-              label: 'Recharger',
-              color: Colors.green,
-              onTap: () {},
-            ),
-            _buildQuickActionButton(
-              icon: Icons.receipt_long,
-              label: 'Factures',
-              color: Colors.orange,
-              onTap: () {},
-            ),
-            _buildQuickActionButton(
-              icon: Icons.more_horiz,
-              label: 'Plus',
-              color: Colors.purple,
-              onTap: () {},
-            ),
-          ],
+          children: actions
+              .map((action) => _buildQuickActionButton(
+                    icon: action['icon'],
+                    label: action['label'],
+                    color: action['color'],
+                    onTap: action['onTap'],
+                  ))
+              .toList(),
         ),
       ),
     );
@@ -450,56 +320,18 @@ class _HomeScreenState extends State<HomeScreen>
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: HomeScreenStyles.getQuickActionDecoration(color),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
+            Icon(icon, color: color, size: HomeScreenStyles.iconSize),
+            const SizedBox(height: HomeScreenStyles.smallSpacing),
             Text(
               label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: HomeScreenStyles.quickActionLabelStyle.copyWith(color: color),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildModalHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Mon QR Code',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -507,18 +339,13 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildTabs() {
     return SliverToBoxAdapter(
       child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 30, 20, 0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12.withOpacity(0.1),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
+        margin: const EdgeInsets.fromLTRB(
+          HomeScreenStyles.defaultSpacing,
+          HomeScreenStyles.largeSpacing,
+          HomeScreenStyles.defaultSpacing,
+          0,
         ),
+        decoration: HomeScreenStyles.tabContainerDecoration,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: DefaultTabController(
@@ -531,10 +358,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               labelColor: Colors.white,
               unselectedLabelColor: Colors.grey[600],
-              labelStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              labelStyle: HomeScreenStyles.tabLabelStyle,
               tabs: [
                 _buildTab("Transactions", Icons.swap_horiz, 5),
                 _buildTab("Favoris", Icons.favorite, 2),
@@ -550,20 +374,17 @@ class _HomeScreenState extends State<HomeScreen>
     return Tab(
       icon: Stack(
         children: [
-          Icon(icon, size: 24),
+          Icon(icon, size: HomeScreenStyles.iconSize),
           if (badgeCount > 0)
             Positioned(
               top: -5,
               right: -5,
               child: Container(
                 padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                decoration: HomeScreenStyles.badgeDecoration,
                 constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
+                  minWidth: HomeScreenStyles.badgeSize,
+                  minHeight: HomeScreenStyles.badgeSize,
                 ),
                 child: Text(
                   '$badgeCount',
@@ -581,8 +402,89 @@ class _HomeScreenState extends State<HomeScreen>
       text: title,
     );
   }
+  
+   void _startScanning() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: HomeScreenStyles.modalContainerDecoration,
+        child: Column(
+          children: [
+            _buildModalHeader('Scanner un QR Code'),
+            const SizedBox(height: HomeScreenStyles.largeSpacing),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                decoration: HomeScreenStyles.scannerContainerDecoration,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: MobileScanner(
+                    controller: _scannerController,
+                    onDetect: _handleScannedCode,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  Widget _buildTabContent(AuthAuthenticated state) {
+void _handleScannedCode(BarcodeCapture capture) {
+    final List<Barcode> barcodes = capture.barcodes;
+    for (final barcode in barcodes) {
+      if (barcode.rawValue != null) {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransferScreen(
+              recipientId: barcode.rawValue,
+            ),
+          ),
+        );
+        break;
+      }
+    }
+  }
+
+  void _showQRCode(BuildContext context, String qrData) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: 400,
+        decoration: HomeScreenStyles.modalContainerDecoration,
+        child: Column(
+          children: [
+            _buildModalHeader('Mon QR Code'),
+            const SizedBox(height: HomeScreenStyles.largeSpacing),
+            QrImageView(
+              data: qrData,
+              version: QrVersions.auto,
+              size: 200.0,
+              eyeStyle: QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: HomeScreenStyles.largeSpacing),
+            Text(
+              'Scannez ce code pour m\'envoyer de l\'argent',
+              style: HomeScreenStyles.qrCodeInstructionStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+Widget _buildTabContent(AuthSuccess state) {
     return SliverFillRemaining(
       hasScrollBody: true,
       child: TabBarView(
@@ -595,53 +497,28 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildTransactionsList(ScrollController scrollController) {
+
+Widget _buildTransactionsList(ScrollController scrollController) {
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
         if (state is TransactionLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (state is TransactionError) {
-          return Center(
-            child: Text('Erreur: ${state.message}'),
-          );
+          return Center(child: Text('Erreur: ${state.message}'));
         }
 
         if (state is TransactionLoaded) {
           if (state.transactions.isEmpty) {
-            return const Center(
-              child: Text('Aucune transaction récente'),
-            );
+            return const Center(child: Text('Aucune transaction récente'));
           }
 
           return ListView.builder(
             itemCount: state.transactions.length,
             itemBuilder: (context, index) {
               final transaction = state.transactions[index];
-              return ListTile(
-                leading: Icon(
-                  transaction.type == TransactionType.sent
-                      ? Icons.arrow_upward
-                      : Icons.arrow_downward,
-                  color: transaction.type == TransactionType.sent
-                      ? Colors.red
-                      : Colors.green,
-                ),
-                title: Text(transaction.recipient),
-                subtitle: Text(DateFormat.yMMMd().format(transaction.date)),
-                trailing: Text(
-                  currencyFormat.format(transaction.amount),
-                  style: TextStyle(
-                    color: transaction.type == TransactionType.sent
-                        ? Colors.red
-                        : Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
+              return _buildTransactionItem(transaction);
             },
           );
         }
@@ -651,47 +528,58 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  Widget _buildTransactionItem(Transaction transaction) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: HomeScreenStyles.defaultSpacing),
+      decoration: HomeScreenStyles.transactionItemDecoration,
+      child: ListTile(
+        leading: Icon(
+          transaction.type == TransactionType.sent
+              ? Icons.arrow_upward
+              : Icons.arrow_downward,
+          color: transaction.type == TransactionType.sent
+              ? HomeScreenStyles.sentColor
+              : HomeScreenStyles.receivedColor,
+        ),
+        title: Text(
+          transaction.recipient,
+          style: HomeScreenStyles.transactionTitleStyle,
+        ),
+        subtitle: Text(
+          DateFormat.yMMMd().format(transaction.date),
+          style: HomeScreenStyles.transactionSubtitleStyle,
+        ),
+        trailing: Text(
+          currencyFormat.format(transaction.amount),
+          style: HomeScreenStyles.getTransactionAmountStyle(transaction.type as bool),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFavoritesList(ScrollController scrollController) {
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(20),
       itemCount: 5,
-      itemBuilder: (context, index) {
-        return _buildFavoriteItem(index);
-      },
+      itemBuilder: (context, index) => _buildFavoriteItem(index),
     );
   }
 
   Widget _buildFavoriteItem(int index) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: HomeScreenStyles.defaultSpacing),
+      decoration: HomeScreenStyles.favoriteItemDecoration,
       child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: _buildFavoriteAvatar(index),
+        contentPadding: HomeScreenStyles.listItemPadding,
+        leading: _buildFavoriteAvatar(index as String),
         title: Text(
           'Contact Favori ${index + 1}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: HomeScreenStyles.favoriteTitleStyle,
         ),
-        subtitle: const Text(
+        subtitle: Text(
           '7X XXX XX XX',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
+          style: HomeScreenStyles.favoriteSubtitleStyle,
         ),
         trailing: IconButton(
           icon: const Icon(Icons.send),
@@ -702,176 +590,36 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildFavoriteAvatar(int index) {
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-      child: Text(
-        String.fromCharCode('A'.codeUnitAt(0) + index),
-        style: TextStyle(
-          color: Theme.of(context).primaryColor,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(Transaction transaction) {
+Widget _buildModalHeader(String title) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildTransactionHeader(transaction),
-            if (transaction.status == TransactionStatus.pending)
-              _buildTransactionProgress(transaction),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionHeader(Transaction transaction) {
-    return Row(
-      children: [
-        _buildTransactionTypeIcon(transaction),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildTransactionDetails(transaction),
-        ),
-        _buildTransactionAmountAndStatus(transaction),
-      ],
-    );
-  }
-
-  Widget _buildTransactionTypeIcon(Transaction transaction) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: transaction.type == TransactionType.sent
-            ? Colors.red.withOpacity(0.1)
-            : Colors.green.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        transaction.type == TransactionType.sent
-            ? Icons.arrow_upward
-            : Icons.arrow_downward,
-        color: transaction.type == TransactionType.sent
-            ? Colors.red
-            : Colors.green,
-        size: 20,
-      ),
-    );
-  }
-
-  Widget _buildTransactionDetails(Transaction transaction) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          transaction.recipient,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          DateFormat('dd MMM yyyy, HH:mm').format(transaction.date),
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactionAmountAndStatus(Transaction transaction) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          '${transaction.type == TransactionType.sent ? "-" : "+"} ${currencyFormat.format(transaction.amount)}',
-          style: TextStyle(
-            color: transaction.type == TransactionType.sent
-                ? Colors.red
-                : Colors.green,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 4),
-        _buildTransactionStatus(transaction),
-      ],
-    );
-  }
-
-  Widget _buildTransactionStatus(Transaction transaction) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: transaction.status == TransactionStatus.completed
-            ? Colors.green.withOpacity(0.1)
-            : Colors.orange.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        transaction.status == TransactionStatus.completed
-            ? 'Complété'
-            : 'En cours',
-        style: TextStyle(
-          color: transaction.status == TransactionStatus.completed
-              ? Colors.green
-              : Colors.orange,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionProgress(Transaction transaction) {
-    return Container(
-      margin: const EdgeInsets.only(top: 16),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+      decoration: HomeScreenStyles.modalContainerDecoration,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: 0.3,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).primaryColor,
-              ),
-              minHeight: 4,
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'En attente de confirmation',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.grey[600]),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
+      ),
+    );
+  }
+
+   Widget _buildFavoriteAvatar(String imageUrl) {
+    return Container(
+      decoration: HomeScreenStyles.avatarDecoration,
+      child: CircleAvatar(
+        backgroundImage: NetworkImage(imageUrl),
+        radius: HomeScreenStyles.avatarSize / 2,
       ),
     );
   }

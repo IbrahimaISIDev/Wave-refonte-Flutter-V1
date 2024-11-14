@@ -6,6 +6,8 @@ class ServiceAuth {
   static const String urlBase = 'http://192.168.6.82:3000/api';
   final http.Client client;
 
+  static var instance;
+
   ServiceAuth({http.Client? client}) : client = client ?? http.Client();
 
   // Fonction d'inscription

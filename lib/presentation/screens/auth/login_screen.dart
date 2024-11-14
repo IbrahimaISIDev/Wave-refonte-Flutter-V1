@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_event.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
+import 'package:wave_app/presentation/screens/home_screen.dart';
 import 'package:wave_app/utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -82,15 +83,19 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthError) {
+          if (state is AuthSuccess) {
+            // Utilisez pushAndRemoveUntil pour éviter le retour à l'écran de login
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            );
+          } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.red,
               ),
             );
-          } else if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
           }
         },
         child: Container(
@@ -154,7 +159,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _secretCodeController,
                             hintText: 'Code secret',
                             prefixIcon: Icons.lock_outline,
-                            obscureText: _obscureSecretCode,
                             keyboardType: TextInputType.number,
                             validator: FormValidators.validateSecretCode,
                             suffixIcon: IconButton(

@@ -1,3 +1,4 @@
+// lib/data/models/user_model.dart
 import 'package:flutter/foundation.dart';
 
 class UserModel {
@@ -20,7 +21,7 @@ class UserModel {
   final String? accessToken;
   final String sexe;
 
-  UserModel({
+  const UserModel({
     required this.id,
     required this.nom,
     required this.prenom,
@@ -41,8 +42,9 @@ class UserModel {
     required this.sexe,
   });
 
-  // Ajout du getter hasSetSecretCode
   bool get hasSetSecretCode => secret != null && secret!.isNotEmpty;
+  String get numeroCompte => carte ?? '';
+  double get balance => solde;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -52,7 +54,6 @@ class UserModel {
       telephone: json['telephone'] ?? '',
       photo: json['photo'],
       email: json['email'] ?? '',
-      // Correction de la conversion des valeurs décimales
       solde: _parseDouble(json['solde']),
       promo: _parseDouble(json['promo']),
       carte: json['carte'],
@@ -68,7 +69,29 @@ class UserModel {
     );
   }
 
-  // Méthode utilitaire pour parser les valeurs décimales
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nom': nom,
+      'prenom': prenom,
+      'telephone': telephone,
+      'photo': photo,
+      'email': email,
+      'solde': solde,
+      'promo': promo,
+      'carte': carte,
+      'etatcarte': etatcarte,
+      'adresse': adresse,
+      'date_naissance': dateNaissance,
+      'secret': secret,
+      'role_id': roleId,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'access_token': accessToken,
+      'sexe': sexe,
+    };
+  }
+
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
@@ -83,37 +106,58 @@ class UserModel {
     return 0.0;
   }
 
-  factory UserModel.forRegistration({
-    required String nom,
-    required String prenom,
-    required String telephone,
-    required String email,
-    required String adresse,
-    required String dateNaissance,
-    required String sexe,
+  UserModel copyWith({
+    int? id,
+    String? nom,
+    String? prenom,
+    String? telephone,
     String? photo,
+    String? email,
+    double? solde,
+    double? promo,
+    String? carte,
+    bool? etatcarte,
+    String? adresse,
+    String? dateNaissance,
+    String? secret,
+    int? roleId,
+    String? createdAt,
+    String? updatedAt,
+    String? accessToken,
+    String? sexe,
   }) {
     return UserModel(
-      id: 0,
-      nom: nom.trim(),
-      prenom: prenom.trim(),
-      telephone: telephone.trim(),
-      email: email.trim(),
-      adresse: adresse.trim(),
-      dateNaissance: dateNaissance,
-      sexe: sexe.toLowerCase(), // Ensure lowercase to match backend validation
-      solde: 0.0,
-      promo: 0.0,
-      etatcarte: false,
-      roleId: 2,
-      createdAt: DateTime.now().toIso8601String(),
-      updatedAt: DateTime.now().toIso8601String(),
-      photo: photo,
+      id: id ?? this.id,
+      nom: nom ?? this.nom,
+      prenom: prenom ?? this.prenom,
+      telephone: telephone ?? this.telephone,
+      photo: photo ?? this.photo,
+      email: email ?? this.email,
+      solde: solde ?? this.solde,
+      promo: promo ?? this.promo,
+      carte: carte ?? this.carte,
+      etatcarte: etatcarte ?? this.etatcarte,
+      adresse: adresse ?? this.adresse,
+      dateNaissance: dateNaissance ?? this.dateNaissance,
+      secret: secret ?? this.secret,
+      roleId: roleId ?? this.roleId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      accessToken: accessToken ?? this.accessToken,
+      sexe: sexe ?? this.sexe,
     );
   }
 
-  get numeroCompte => null;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          telephone == other.telephone;
 
-  get balance => null;
-  
+  @override
+  int get hashCode => id.hashCode ^ telephone.hashCode;
+
+  static forRegistration({required String nom, required String prenom, required String telephone, required String email, required String adresse, required String dateNaissance, required String sexe, String? photo}) {}
 }

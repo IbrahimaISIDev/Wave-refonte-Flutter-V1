@@ -9,6 +9,7 @@ class CancelTransferDialog extends StatefulWidget {
   const CancelTransferDialog({super.key, required this.transactionId});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CancelTransferDialogState createState() => _CancelTransferDialogState();
 }
 
@@ -44,4 +45,5 @@ class _CancelTransferDialogState extends State<CancelTransferDialog> {
       ],
     );
   }
+  
 }

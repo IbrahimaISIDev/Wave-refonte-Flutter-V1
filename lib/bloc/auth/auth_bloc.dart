@@ -1,3 +1,5 @@
+// lib/bloc/auth/auth_bloc.dart
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_event.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
@@ -20,12 +22,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await authRepository.getCurrentUser();
       if (user != null) {
         if (!user.hasSetSecretCode) {
-          emit(AuthNeedsSecretCode(user));  // L'utilisateur doit définir un code secret
+          emit(AuthNeedsSecretCode(user));
         } else {
-          emit(AuthAuthenticated(user));  // Utilisateur authentifié
+          emit(AuthSuccess(user));  // Changé de AuthAuthenticated à AuthSuccess
         }
       } else {
-        emit(AuthUnauthenticated());  // Utilisateur non authentifié
+        emit(AuthUnauthenticated());
       }
     } catch (e) {
       emit(AuthError('Erreur lors de la vérification de l\'état de l\'utilisateur: $e'));
@@ -37,9 +39,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.login(
         phone: event.phone,
-        code: event.secretCode,  // Utilisez secretCode au lieu de code
+        code: event.secretCode,
       );
-      emit(AuthAuthenticated(user));
+      emit(AuthSuccess(user));  // Changé de AuthAuthenticated à AuthSuccess
     } catch (e) {
       emit(AuthError('Erreur lors de la connexion: $e'));
     }
@@ -52,9 +54,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         name: event.name,
         phone: event.phone,
         email: event.email,
-        password: '',  // La gestion du mot de passe sera ajoutée plus tard
+        password: '',
       );
-      emit(AuthOtpVerified(event.phone));  // L'utilisateur peut maintenant vérifier son OTP
+      emit(AuthOtpVerified(event.phone));
     } catch (e) {
       emit(AuthError('Erreur lors de l\'inscription: $e'));
     }
@@ -67,7 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phone: event.phone,
         otp: event.otp,
       );
-      emit(AuthNeedsSecretCode(user));  // L'utilisateur doit définir un code secret après avoir vérifié l'OTP
+      emit(AuthNeedsSecretCode(user));
     } catch (e) {
       emit(AuthError('Erreur lors de la soumission de l\'OTP: $e'));
     }
@@ -80,7 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phone: event.phone,
         secretCode: event.secretCode,
       );
-      emit(AuthAuthenticated(user));  // Utilisateur authentifié après avoir défini le code secret
+      emit(AuthSuccess(user));  // Changé de AuthAuthenticated à AuthSuccess
     } catch (e) {
       emit(AuthError('Erreur lors de la soumission du code secret: $e'));
     }
@@ -90,7 +92,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await authRepository.logout();
-      emit(AuthUnauthenticated());  // Utilisateur déconnecté
+      emit(AuthUnauthenticated());
     } catch (e) {
       emit(AuthError('Erreur lors de la déconnexion: $e'));
     }

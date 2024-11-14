@@ -9,6 +9,7 @@ environment:
   sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
+  flutter_secure_storage: ^8.0.0
   flutter:
     sdk: flutter
   shared_preferences: ^2.0.0
@@ -31,7 +32,10 @@ dependencies:
   equatable: ^2.0.5
   
   # Image Handling
-  image_picker: ^1.0.7
+  #image_picker: ^1.0.7
+  path: ^1.9.0
+  path_provider: ^2.0.15
+  image_picker: ^1.1.2
   
   # QR Code
   qr_flutter: ^4.1.0

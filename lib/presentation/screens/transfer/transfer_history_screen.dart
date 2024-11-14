@@ -5,20 +5,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_bloc.dart';
 import 'package:wave_app/bloc/transfer/transfer_event.dart';
 import 'package:wave_app/bloc/transfer/transfer_state.dart';
+import 'package:wave_app/data/models/transfer_model.dart';
 
 class TransferHistoryScreen extends StatefulWidget {
   const TransferHistoryScreen({super.key});
 
   @override
-  State createState() => _TransferHistoryScreenState();
+  State<TransferHistoryScreen> createState() => _TransferHistoryScreenState();
 }
 
 class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    // Assurez-vous que le nom de cet événement est bien défini dans TransferBloc
-    context.read<TransferBloc>().add(LoadTransferHistoryEvent() as TransferEvent);
+    context.read<TransferBloc>().add(LoadTransferHistoryEvent());
   }
 
   @override
@@ -68,22 +68,23 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
                                 color: Colors.black87,
                               ),
                             ),
-                            _buildStatusChip(transfer.status),
+                            _buildStatusChip(transfer.status ?? 'Unknown'), // Gérer les valeurs null
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Destinataire: ${transfer.recipientNumber}',
+                          'Destinataire: ${transfer.recipient.phone}',
                           style: GoogleFonts.poppins(
                             color: Colors.black54,
                           ),
                         ),
-                        Text(
-                          'Date: ${_formatDate(transfer.createdAt)}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.black54,
+                        if (transfer.createdAt != null) // Gérer les valeurs null
+                          Text(
+                            'Date: ${_formatDate(transfer.createdAt!)}', // Utiliser ! pour accéder à la valeur non nullable
+                            style: GoogleFonts.poppins(
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -91,22 +92,23 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
               },
             );
           } else if (state is TransferError) {
-          return Center(
-            child: Text(
-              state.message ?? 'Une erreur est survenue',
-              style: GoogleFonts.poppins(color: Colors.red),
-            ),
-          );
-        }
-        return const SizedBox.shrink();
+            return Center(
+              child: Text(
+                state.message ?? 'Une erreur est survenue',
+                style: GoogleFonts.poppins(color: Colors.red),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
         },
       ),
     );
   }
 
-  Widget _buildStatusChip(String status) {
+  Widget _buildStatusChip(String? status) {
     Color color;
-    switch (status.toLowerCase()) {
+    String displayStatus = status ?? 'Unknown'; // Gérer les valeurs null
+    switch (displayStatus.toLowerCase()) {
       case 'completed':
         color = Colors.green;
         break;
@@ -124,7 +126,7 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status,
+        displayStatus,
         style: GoogleFonts.poppins(
           color: color,
           fontWeight: FontWeight.w500,
@@ -137,5 +139,3 @@ class _TransferHistoryScreenState extends State<TransferHistoryScreen> {
     return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
   }
 }
-
-

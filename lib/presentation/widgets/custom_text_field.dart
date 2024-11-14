@@ -38,36 +38,3 @@ class CustomTextField extends StatelessWidget {
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-
-// class CustomTextField extends StatelessWidget {
-//   final TextEditingController controller;
-//   final String label;
-//   final TextInputType keyboardType;
-//   final IconData prefixIcon;
-//   final String? Function(String?)? validator;  // Added validator parameter
-
-//   const CustomTextField({
-//     Key? key,
-//     required this.controller,
-//     required this.label,
-//     required this.keyboardType,
-//     required this.prefixIcon,
-//     this.validator,  // Added to constructor
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return TextFormField(
-//       controller: controller,
-//       keyboardType: keyboardType,
-//       validator: validator,  // Use the validator
-//       decoration: InputDecoration(
-//         labelText: label,
-//         prefixIcon: Icon(prefixIcon),
-//         border: const OutlineInputBorder(),
-//       ),
-//     );
-//   }
-// }

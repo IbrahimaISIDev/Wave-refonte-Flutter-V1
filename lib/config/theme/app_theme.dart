@@ -25,4 +25,10 @@ class AppTheme {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
   );
+
+  static var colorScheme;
+
+  static var inputDecorationTheme;
+
+  static getThemeData() {}
 }

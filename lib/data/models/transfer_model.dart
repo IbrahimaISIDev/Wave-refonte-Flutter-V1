@@ -1,57 +1,31 @@
-// lib/data/models/transfer_model.dart
-import 'dart:async';
+// Définition de l'énumération TransferType
+enum TransferType { single, multiple }
 
-class TransferResult {
-  final int transactionId;
-  final double amount;
-  final Recipient recipient;
-  final DateTime date;
-  final double balance;
+// Définition de la classe Recipient
+class Recipient {
+  final String firstName;
+  final String lastName;
+  final String phone;
+  final bool isFavorite;
 
-  TransferResult({
-    required this.transactionId,
-    required this.amount,
-    required this.recipient,
-    required this.date,
-    required this.balance,
+  Recipient({
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
+    this.isFavorite = false,
   });
 
-  static Future<TransferResult> fromJson(data) {
-    // Implementation of parsing JSON data
-    return Future.value(TransferResult(
-      transactionId: data['transaction_id'],
-      amount: data['amount'],
-      recipient: Recipient.fromJson(data['recipient']),
-      date: DateTime.parse(data['date']),
-      balance: data['balance'],
-    ));
+  factory Recipient.fromJson(Map<String, dynamic> json) {
+    return Recipient(
+      firstName: json['prenom'] ?? '',
+      lastName: json['nom'] ?? '',
+      phone: json['telephone'] ?? '',
+      isFavorite: json['is_favori'] ?? false,
+    );
   }
 }
 
-class MultipleTransferResult {
-  final List<TransferResult> successfulTransfers;
-  final List<FailedTransfer> failedTransfers;
-  final double totalTransferred;
-  final double remainingBalance;
-
-  MultipleTransferResult({
-    required this.successfulTransfers,
-    required this.failedTransfers,
-    required this.totalTransferred,
-    required this.remainingBalance,
-  });
-
-  static Future<MultipleTransferResult> fromJson(data) {
-    // Implementation of parsing JSON data
-    return Future.value(MultipleTransferResult(
-      successfulTransfers: data['successful_transfers'].map((data) => TransferResult.fromJson(data)).toList(),
-      failedTransfers: data['failed_transfers'].map((data) => FailedTransfer.fromJson(data)).toList(),
-      totalTransferred: data['total_transferred'],
-      remainingBalance: data['remaining_balance'],
-    ));
-  }
-}
-
+// Définition de la classe FailedTransfer
 class FailedTransfer {
   final String recipient;
   final String reason;
@@ -60,13 +34,101 @@ class FailedTransfer {
     required this.recipient,
     required this.reason,
   });
-  
-  static fromJson(data) {
-    // Implementation of parsing JSON data
+
+  factory FailedTransfer.fromJson(Map<String, dynamic> json) {
     return FailedTransfer(
-      recipient: data['recipient'],
-      reason: data['reason'],
+      recipient: json['recipient'] ?? '',
+      reason: json['reason'] ?? 'Raison inconnue',
     );
+  }
+}
+
+// Classe principale TransferResult
+class TransferResult {
+  final int transactionId;
+  final double amount;
+  final Recipient recipient;
+  final DateTime? createdAt;
+  final double? balance;
+  final String? status;
+
+  TransferResult({
+    required this.transactionId,
+    required this.amount,
+    required this.recipient,
+    this.createdAt,
+    this.balance,
+    this.status,
+  });
+
+  factory TransferResult.fromJson(Map<String, dynamic> data) {
+    return TransferResult(
+      transactionId: data['transaction_id'] ?? 0,
+      amount: _safeParseDouble(data['amount']),
+      recipient: Recipient.fromJson(data['recipient'] ?? {}),
+      createdAt: data['date'] != null ? DateTime.parse(data['date']) : null,
+      balance: _safeParseDouble(data['balance']),
+      status: data['status'],
+    );
+  }
+
+  static double _safeParseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value.replaceAll(",", "."));
+      } catch (e) {
+        return 0.0;
+      }
+    }
+    return 0.0;
+  }
+}
+
+class MultipleTransferResult {
+  final List<TransferResult> successfulTransfers;
+  final List<FailedTransfer> failedTransfers;
+  final double totalTransferred;
+  final double remainingBalance;
+  final int transfersCompleted;
+  final int transfersFailed;
+
+  MultipleTransferResult({
+    required this.successfulTransfers,
+    required this.failedTransfers,
+    required this.totalTransferred,
+    required this.remainingBalance,
+    required this.transfersCompleted,
+    required this.transfersFailed,
+  });
+
+  factory MultipleTransferResult.fromJson(Map<String, dynamic> json) {
+    return MultipleTransferResult(
+      successfulTransfers: (json['successful_transfers'] as List?)
+          ?.map((data) => TransferResult.fromJson(data))
+          .toList() ?? [],
+      failedTransfers: (json['failed_transfers'] as List?)
+          ?.map((data) => FailedTransfer.fromJson(data))
+          .toList() ?? [],
+      totalTransferred: _safeParseDouble(json['total_transferred']),
+      remainingBalance: _safeParseDouble(json['remaining_balance']),
+      transfersCompleted: json['transfers_completed'] ?? 0,
+      transfersFailed: json['transfers_failed'] ?? 0,
+    );
+  }
+
+  static double _safeParseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value.replaceAll(",", "."));
+      } catch (e) {
+        return 0.0;
+      }
+    }
+    return 0.0;
   }
 }
 
@@ -74,20 +136,35 @@ class CancelTransferResult {
   final int transactionId;
   final double refundAmount;
   final double newBalance;
+  final DateTime cancelDate;
 
   CancelTransferResult({
     required this.transactionId,
     required this.refundAmount,
     required this.newBalance,
+    required this.cancelDate,
   });
 
-  static Future<CancelTransferResult> fromJson(data) {
-    // Implementation of parsing JSON data
-    return Future.value(CancelTransferResult(
-      transactionId: data['transaction_id'],
-      refundAmount: data['refund_amount'],
-      newBalance: data['new_balance'],
-    ));
+  factory CancelTransferResult.fromJson(Map<String, dynamic> json) {
+    return CancelTransferResult(
+      transactionId: json['transaction_id'] ?? 0,
+      refundAmount: _safeParseDouble(json['refund_amount']),
+      newBalance: _safeParseDouble(json['new_balance']),
+      cancelDate: DateTime.parse(json['cancel_date'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  static double _safeParseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value.replaceAll(",", "."));
+      } catch (e) {
+        return 0.0;
+      }
+    }
+    return 0.0;
   }
 }
 
@@ -106,169 +183,26 @@ class TransferHistory {
     required this.type,
   });
 
-  static fromJson(item) {
-    // Implementation of parsing JSON data
+  factory TransferHistory.fromJson(Map<String, dynamic> item) {
     return TransferHistory(
-      id: item['id'],
-      amount: item['amount'],
-      recipient: Recipient.fromJson(item['recipient']),
-      date: DateTime.parse(item['date']),
-      type: TransferType.single, // Assuming single transfer type for simplicity
+      id: item['id'] ?? 0,
+      amount: _safeParseDouble(item['amount']),
+      recipient: Recipient.fromJson(item['recipient'] ?? {}),
+      date: DateTime.parse(item['date'] ?? DateTime.now().toIso8601String()),
+      type: TransferType.single,
     );
   }
-}
 
-class TransferSchedule {
-  final DateTime nextTransferDate;
-  final Duration frequency;
-
-  TransferSchedule({
-    required this.nextTransferDate,
-    required this.frequency,
-  });
-}
-
-class Recipient {
-  final String name;
-  final String phone;
-
-  Recipient({
-    required this.name,
-    required this.phone,
-  });
-  
-  static fromJson(data) {
-    // Implementation of parsing JSON data
-    return Recipient(
-      name: data['name'],
-      phone: data['phone'],
-    );
+  static double _safeParseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value.replaceAll(",", "."));
+      } catch (e) {
+        return 0.0;
+      }
+    }
+    return 0.0;
   }
 }
-
-enum TransferType { single, multiple }
-
-class TransferModel {
-  final int id;
-  final int senderId;
-  final int recipientId;
-  final double amount;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final String name;
-  final String status;
-  final String description;
-  final String type;
-  final String currency;
-  final String recipientName;
-  final String recipientPhone;
-
-  TransferModel({
-    required this.id,
-    required this.senderId,
-    required this.recipientId,
-    required this.amount,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.name,
-    required this.status,
-    required this.description,
-    required this.type,
-    required this.currency,
-    required this.recipientName,
-    required this.recipientPhone,
-  });
-
-  // Méthode fromJson pour convertir des données JSON en une instance TransferModel
-  static Future<TransferModel> fromJson(Map<String, dynamic> data) async {
-    return TransferModel(
-      id: data['id'] as int,
-      senderId: data['sender_id'] as int,
-      recipientId: data['recipient_id'] as int,
-      amount: (data['amount'] as num).toDouble(),
-      createdAt: DateTime.parse(data['created_at'] as String),
-      updatedAt: DateTime.parse(data['updated_at'] as String),
-      name: data['name'] as String,
-      status: data['status'] as String,
-      description: data['description'] as String,
-      type: data['type'] as String,
-      currency: data['currency'] as String,
-      recipientName: data['recipient_name'] as String,
-      recipientPhone: data['recipient_phone'] as String,
-    );
-  }
-}
-
-
-// // lib/data/models/transfer_model.dart
-
-// class TransferModel {
-//   final int id;
-//   final int senderId;
-//   final int recipientId;
-//   final double amount;
-//   final DateTime createdAt;
-//   final DateTime updatedAt;
-//   final String name;
-//   final String status;
-//   final String description;
-//   final String type;
-//   final String currency;
-//   final String recipientName;
-
-//   TransferModel({
-//     required this.id,
-//     required this.senderId,
-//     required this.recipientId,
-//     required this.amount,
-//     required this.createdAt,
-//     required this.updatedAt,
-//     required this.name,
-//     required this.status,
-//     required this.description,
-//     required this.type,
-//     required this.currency,
-//     required this.recipientName,
-//   });
-
-//   factory TransferModel.fromJson(Map<String, dynamic> json) {
-//     return TransferModel(
-//       id: json['id'],
-//       senderId: json['sender_id'],
-//       recipientId: json['recipient_id'],
-//       amount: json['amount'].toDouble(),
-//       createdAt: DateTime.parse(json['created_at']),
-//       updatedAt: DateTime.parse(json['updated_at']),
-//       name: json['name'],
-//       status: json['status'],
-//       description: json['description'],
-//       type: json['type'],
-//       currency: json['currency'],
-//       recipientName: json['recipient_name'],
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'id': id,
-//       'sender_id': senderId,
-//       'recipient_id': recipientId,
-//       'amount': amount,
-//       'created_at': createdAt.toIso8601String(),
-//       'updated_at': updatedAt.toIso8601String(),
-//       'name': name,
-//       'status': status,
-//       'description': description,
-//       'type': type,
-//       'currency': currency,
-//       'recipient_name': recipientName,
-//     };
-//   }
-// }
-
-// // Optional: Extension for string parsing, not strictly necessary here.
-// extension DateTimeParsing on String {
-//   String toIso8601String() {
-//     return DateTime.parse(this).toUtc().toIso8601String();
-//   }
-// }

@@ -38,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            if (state is AuthAuthenticated) {
+            if (state is AuthSuccess) {
               return _buildProfileDetails(context, state.user);
             }
             return const Center(child: CircularProgressIndicator());
@@ -58,7 +58,7 @@ class ProfileScreen extends StatelessWidget {
             backgroundImage: user.photo != null ? NetworkImage(user.photo!) : null,
             backgroundColor: Colors.blue,
             child: user.photo == null
-                ? Icon(Icons.person, size: 50, color: Colors.white)
+                ? const Icon(Icons.person, size: 50, color: Colors.white)
                 : null,
           ),
           const SizedBox(height: 24),
@@ -68,8 +68,8 @@ class ProfileScreen extends StatelessWidget {
               _buildInfoRow(Icons.person, 'Nom', user.nom),
               _buildInfoRow(Icons.phone, 'Téléphone', user.telephone),
               _buildInfoRow(Icons.email, 'Email', user.email),
-              _buildInfoRow(Icons.location_on, 'Adresse', user.adresse ?? 'Non renseigné'),
-              _buildInfoRow(Icons.cake, 'Date de naissance', user.dateNaissance ?? 'Non renseigné'),
+              _buildInfoRow(Icons.location_on, 'Adresse', user.adresse),
+              _buildInfoRow(Icons.cake, 'Date de naissance', user.dateNaissance),
             ],
           ),
           const SizedBox(height: 20),
