@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DioService {
-  static const String baseUrl = 'http://192.168.6.82:3000/api';
+  static const String baseUrl = 'http://192.168.1.95:3000/api';
   //static const String baseUrl = 'https://flutter-laravel-wave-app.onrender.com/api';
 
   static const String tokenKey = 'auth_token';

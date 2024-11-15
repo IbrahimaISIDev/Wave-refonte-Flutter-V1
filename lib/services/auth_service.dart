@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceAuth {
-  static const String urlBase = 'http://192.168.6.82:3000/api';
+  static const String urlBase = 'http://192.168.1.95:3000/api';
   //static const String urlBase = 'https://flutter-laravel-wave-app.onrender.com/api';
 
   final http.Client client;

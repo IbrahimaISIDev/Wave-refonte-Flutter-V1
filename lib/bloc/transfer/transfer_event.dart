@@ -8,7 +8,10 @@ abstract class TransferEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadTransferHistoryEvent extends TransferEvent {}
+class LoadTransferHistoryEvent extends TransferEvent {
+  @override
+  List<Object> get props => [];
+}
 
 class PerformTransferEvent extends TransferEvent {
   final String recipientPhone;
@@ -66,14 +69,3 @@ class CancelTransferEvent extends TransferEvent {
   @override
   List<Object> get props => [transactionId, reason];
 }
-
-// class ScheduleTransferEvent extends TransferEvent {
-//   final ScheduledTransfer scheduledTransfer;
-
-//   const ScheduleTransferEvent({
-//     required this.scheduledTransfer,
-//   });
-
-//   @override
-//   List<Object> get props => [scheduledTransfer];
-// }

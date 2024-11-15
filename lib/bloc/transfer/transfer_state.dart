@@ -39,3 +39,9 @@ class TransferFailure extends TransferState {
 
   get message => null;
 }
+
+class TransferHistoryLoaded extends TransferState {
+  final List<Map<String, dynamic>> transfers;
+
+  const TransferHistoryLoaded({required this.transfers}) : super(isLoading: false);
+}

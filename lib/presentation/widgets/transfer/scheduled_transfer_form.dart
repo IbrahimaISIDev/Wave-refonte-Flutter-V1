@@ -209,13 +209,12 @@ import 'package:wave_app/bloc/transfer/transfer_state.dart';
 import 'package:wave_app/presentation/widgets/transfer/loading_bouton.dart';
 import 'package:wave_app/services/notification_service.dart';
 import 'package:wave_app/utils/styles.dart';
-import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:intl/intl.dart';
 
 class ScheduledTransferForm extends StatefulWidget {
   const ScheduledTransferForm({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ScheduledTransferFormState createState() => _ScheduledTransferFormState();
 }
 
@@ -243,6 +242,12 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
     if (value?.isEmpty ?? true) return 'Montant requis';
     final amount = double.tryParse(value ?? '');
     if (amount == null || amount <= 0) return 'Montant invalide';
+    if (amount < 500) return 'Le montant minimum est de 500 FCFA';
+    return null;
+  }
+
+  String? _validateTime(TimeOfDay? time) {
+    if (time == null) return 'Heure d\'exécution requise';
     return null;
   }
 
@@ -250,7 +255,7 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null) {
@@ -268,16 +273,41 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
     }
   }
 
+  // Fonction pour formater l'heure au format HH:mm
+  String formatTimeOfDay(TimeOfDay timeOfDay) {
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      timeOfDay.hour,
+      timeOfDay.minute,
+    );
+    return DateFormat('HH:mm').format(dateTime);
+  }
+
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
       final recipientPhone = _recipientController.text;
       final amount = double.tryParse(_amountController.text) ?? 0.0;
       final startDate = _selectedDate;
       final frequency = _selectedFrequency;
-      final executionTime = _selectedTime?.format(context);
+      final timeValidation = _validateTime(_selectedTime);
 
-      if (startDate != null && frequency != null && executionTime != null) {
+      if (timeValidation != null) {
+        NotificationService.showNotification(
+          context,
+          message: timeValidation,
+          type: NotificationType.error,
+        );
+        return;
+      }
+
+      if (startDate != null && frequency != null && _selectedTime != null) {
         final endDate = startDate.add(const Duration(days: 365));
+        // Formatage de l'heure au format HH:mm
+        final formattedTime = formatTimeOfDay(_selectedTime!);
+
         context.read<TransferBloc>().add(
               ScheduleTransferEvent(
                 recipientPhone: recipientPhone,
@@ -285,7 +315,7 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
                 startDate: startDate,
                 endDate: endDate,
                 frequency: frequency,
-                executionTime: executionTime,
+                executionTime: formattedTime, // Utilisation de l'heure formatée
               ),
             );
       }
@@ -303,11 +333,14 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
             message: state.message,
             type: NotificationType.success,
           );
+          _formKey.currentState?.reset();
           _recipientController.clear();
           _amountController.clear();
-          _selectedDate = null;
-          _selectedFrequency = null;
-          _selectedTime = null;
+          setState(() {
+            _selectedDate = null;
+            _selectedFrequency = null;
+            _selectedTime = null;
+          });
         } else if (state is TransferFailure) {
           setState(() => _isProcessing = false);
           NotificationService.showNotification(
@@ -340,21 +373,30 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
                 decoration: TransferFormStyles.getInputDecoration(
                   labelText: 'Montant',
                   icon: Icons.attach_money,
-                  hintText: '0.00 FCFA',
+                  hintText: '500 FCFA minimum',
                 ),
                 validator: _validateAmount,
               ),
               const SizedBox(height: 20),
               GestureDetector(
                 onTap: () => _selectDate(context),
-                child: InputDecorator(
-                  decoration: TransferFormStyles.getInputDecoration(
-                    labelText: 'Date de début',
-                    icon: Icons.calendar_today,
-                  ),
-                  child: Text(
-                    _selectedDate?.toString().split(' ')[0] ?? 'Sélectionner une date',
-                  ),
+                child: FormField<DateTime>(
+                  validator: (value) => value == null ? 'Date requise' : null,
+                  initialValue: _selectedDate,
+                  builder: (FormFieldState<DateTime> state) {
+                    return InputDecorator(
+                      decoration: TransferFormStyles.getInputDecoration(
+                        labelText: 'Date de début',
+                        icon: Icons.calendar_today,
+                        errorText: state.errorText,
+                      ),
+                      child: Text(
+                        _selectedDate != null
+                            ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
+                            : 'Sélectionner une date',
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -376,14 +418,23 @@ class _ScheduledTransferFormState extends State<ScheduledTransferForm> {
               const SizedBox(height: 20),
               GestureDetector(
                 onTap: () => _selectTime(context),
-                child: InputDecorator(
-                  decoration: TransferFormStyles.getInputDecoration(
-                    labelText: 'Heure d\'exécution',
-                    icon: Icons.access_time,
-                  ),
-                  child: Text(
-                    _selectedTime?.format(context) ?? 'Sélectionner une heure',
-                  ),
+                child: FormField<TimeOfDay>(
+                  validator: (value) => _validateTime(value),
+                  initialValue: _selectedTime,
+                  builder: (FormFieldState<TimeOfDay> state) {
+                    return InputDecorator(
+                      decoration: TransferFormStyles.getInputDecoration(
+                        labelText: 'Heure d\'exécution',
+                        icon: Icons.access_time,
+                        errorText: state.errorText,
+                      ),
+                      child: Text(
+                        _selectedTime != null 
+                            ? formatTimeOfDay(_selectedTime!)
+                            : 'Sélectionner une heure',
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 32),

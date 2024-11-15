@@ -12,6 +12,7 @@ import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
+import 'package:wave_app/presentation/widgets/transfer/qr_paiement.dart';
 import 'package:wave_app/utils/HomeScreenStyles.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -145,7 +146,8 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(height: HomeScreenStyles.smallSpacing),
             GestureDetector(
-              onTap: () => setState(() => _isBalanceVisible = !_isBalanceVisible),
+              onTap: () =>
+                  setState(() => _isBalanceVisible = !_isBalanceVisible),
               child: _buildBalance(state.user.solde),
             ),
           ],
@@ -164,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen>
           Text(
             _isBalanceVisible
                 ? currencyFormat.format(balance)
-                : '• • • • • • • • • •',
+                : '• • • • • • • • • • • •',
             style: HomeScreenStyles.balanceTextStyle,
           ),
           const SizedBox(width: HomeScreenStyles.smallSpacing),
@@ -328,7 +330,8 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(height: HomeScreenStyles.smallSpacing),
             Text(
               label,
-              style: HomeScreenStyles.quickActionLabelStyle.copyWith(color: color),
+              style:
+                  HomeScreenStyles.quickActionLabelStyle.copyWith(color: color),
             ),
           ],
         ),
@@ -402,8 +405,8 @@ class _HomeScreenState extends State<HomeScreen>
       text: title,
     );
   }
-  
-   void _startScanning() {
+
+  void _startScanning() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -434,16 +437,17 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-void _handleScannedCode(BarcodeCapture capture) {
+// Mettre à jour la méthode _handleScannedCode dans la classe _HomeScreenState
+  void _handleScannedCode(BarcodeCapture capture) {
     final List<Barcode> barcodes = capture.barcodes;
     for (final barcode in barcodes) {
       if (barcode.rawValue != null) {
-        Navigator.pop(context);
+        Navigator.pop(context); // Fermer le scanner
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TransferScreen(
-              recipientId: barcode.rawValue,
+            builder: (context) => QRPaymentForm(
+              scannedPhone: barcode.rawValue!,
             ),
           ),
         );
@@ -452,7 +456,8 @@ void _handleScannedCode(BarcodeCapture capture) {
     }
   }
 
-  void _showQRCode(BuildContext context, String qrData) {
+  // Mettre à jour la méthode _showQRCode dans la classe _HomeScreenState
+  void _showQRCode(BuildContext context, String phoneNumber) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -464,7 +469,7 @@ void _handleScannedCode(BarcodeCapture capture) {
             _buildModalHeader('Mon QR Code'),
             const SizedBox(height: HomeScreenStyles.largeSpacing),
             QrImageView(
-              data: qrData,
+              data: phoneNumber, // Utiliser directement le numéro de téléphone
               version: QrVersions.auto,
               size: 200.0,
               eyeStyle: QrEyeStyle(
@@ -473,6 +478,14 @@ void _handleScannedCode(BarcodeCapture capture) {
               ),
             ),
             const SizedBox(height: HomeScreenStyles.largeSpacing),
+            Text(
+              'Mon numéro: $phoneNumber',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               'Scannez ce code pour m\'envoyer de l\'argent',
               style: HomeScreenStyles.qrCodeInstructionStyle,
@@ -483,8 +496,7 @@ void _handleScannedCode(BarcodeCapture capture) {
     );
   }
 
-
-Widget _buildTabContent(AuthSuccess state) {
+  Widget _buildTabContent(AuthSuccess state) {
     return SliverFillRemaining(
       hasScrollBody: true,
       child: TabBarView(
@@ -497,8 +509,7 @@ Widget _buildTabContent(AuthSuccess state) {
     );
   }
 
-
-Widget _buildTransactionsList(ScrollController scrollController) {
+  Widget _buildTransactionsList(ScrollController scrollController) {
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
         if (state is TransactionLoading) {
@@ -551,7 +562,8 @@ Widget _buildTransactionsList(ScrollController scrollController) {
         ),
         trailing: Text(
           currencyFormat.format(transaction.amount),
-          style: HomeScreenStyles.getTransactionAmountStyle(transaction.type as bool),
+          style: HomeScreenStyles.getTransactionAmountStyle(
+              transaction.type as bool),
         ),
       ),
     );
@@ -590,7 +602,7 @@ Widget _buildTransactionsList(ScrollController scrollController) {
     );
   }
 
-Widget _buildModalHeader(String title) {
+  Widget _buildModalHeader(String title) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
       decoration: HomeScreenStyles.modalContainerDecoration,
@@ -614,7 +626,7 @@ Widget _buildModalHeader(String title) {
     );
   }
 
-   Widget _buildFavoriteAvatar(String imageUrl) {
+  Widget _buildFavoriteAvatar(String imageUrl) {
     return Container(
       decoration: HomeScreenStyles.avatarDecoration,
       child: CircleAvatar(

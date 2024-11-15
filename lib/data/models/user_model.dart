@@ -159,5 +159,11 @@ class UserModel {
   @override
   int get hashCode => id.hashCode ^ telephone.hashCode;
 
+  get transactions => null;
+
+  get points => null;
+
+  get niveau => null;
+
   static forRegistration({required String nom, required String prenom, required String telephone, required String email, required String adresse, required String dateNaissance, required String sexe, String? photo}) {}
 }

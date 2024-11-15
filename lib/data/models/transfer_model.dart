@@ -205,22 +205,22 @@ class TransferHistory {
     }
     return 0.0;
   }
+  toMap() {}
 }
 
-// class ScheduledTransfer {
-//   final String recipientPhone;
-//   final double amount;
-//   final String frequency;
-//   final DateTime startDate;
-//   final DateTime endDate;
-//   final String executionTime;
+class Transfer {
+  final double amount;
+  final String date;
+  final String status;
 
-//   ScheduledTransfer({
-//     required this.recipientPhone,
-//     required this.amount,
-//     required this.frequency,
-//     required this.startDate,
-//     required this.endDate,
-//     required this.executionTime,
-//   });
-// }
+  Transfer({required this.amount, required this.date, required this.status});
+
+  // Factory constructor to create a Transfer from a map
+  factory Transfer.fromMap(Map<String, dynamic> map) {
+    return Transfer(
+      amount: map['amount'] ?? 0.0,
+      date: map['date'] ?? '',
+      status: map['status'] ?? 'unknown',
+    );
+  }
+}
