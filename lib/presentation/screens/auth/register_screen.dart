@@ -31,7 +31,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _birthdateController = TextEditingController();
 
   File? _profileImage; // Stocke l'image de profil sélectionnée
-  final _picker = ImagePicker(); // Instance d'ImagePicker pour sélectionner des images
+  final _picker =
+      ImagePicker(); // Instance d'ImagePicker pour sélectionner des images
   DateTime? _selectedDate;
   String _selectedGender = 'Non spécifié';
 
@@ -115,75 +116,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // void _showImageSourceDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
-  //         title: const Text('Choisir une photo de profil',
-  //             style: TextStyle(color: Colors.white)),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             ListTile(
-  //               leading: const Icon(Icons.camera_alt, color: Colors.white),
-  //               title: const Text('Prendre une photo',
-  //                   style: TextStyle(color: Colors.white)),
-  //               onTap: () {
-  //                 Navigator.pop(context);
-  //                 _pickImage(ImageSource.camera);
-  //               },
-  //             ),
-  //             ListTile(
-  //               leading: const Icon(Icons.photo_library, color: Colors.white),
-  //               title: const Text('Choisir depuis la galerie',
-  //                   style: TextStyle(color: Colors.white)),
-  //               onTap: () {
-  //                 Navigator.pop(context);
-  //                 _pickImage(ImageSource.gallery);
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _showImageSourceDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        // ... Configuration du dialogue
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Option Camera
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Prendre une photo'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            // Option Galerie
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choisir depuis la galerie'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // ... Configuration du dialogue
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Option Camera
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Prendre une photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              // Option Galerie
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choisir depuis la galerie'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -515,42 +480,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
 // Mise à jour de la fonction _handleRegister()
+// Supprimer ou modifier la vérification de l'image obligatoire dans _handleRegister()
   void _handleRegister() async {
     if (_formKey.currentState!.validate() && _acceptTerms) {
       setState(() => _isLoading = true);
 
       try {
-        // Convertir le genre sélectionné au format attendu
         String sexe = _selectedGender == 'Homme' ? 'homme' : 'femme';
-
-        // Formater la date au format attendu par le backend (si nécessaire)
         String formattedDate = _birthdateController.text;
 
-        // Vérifier si l'image est valide (format image)
-        // if (_profileImage != null) {
-        //   final mimeType = lookupMimeType(_profileImage!.path);
-        //   if (mimeType == null || !mimeType.startsWith('image/')) {
-        //     // Afficher une erreur si ce n'est pas une image valide
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       const SnackBar(
-        //         content:
-        //             Text('Le fichier sélectionné n\'est pas une image valide.'),
-        //         backgroundColor: Colors.red,
-        //       ),
-        //     );
-        //     setState(() => _isLoading = false);
-        //     return;
-        //   }
-        // }
-        if (_profileImage == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Veuillez sélectionner une photo de profil'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
+        // Supprimer cette condition qui rend l'image obligatoire
+        /* if (_profileImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veuillez sélectionner une photo de profil'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      } */
 
         final user = UserModel.forRegistration(
           nom: _nameController.text.trim(),
@@ -560,14 +508,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           adresse: _addressController.text.trim(),
           dateNaissance: formattedDate,
           sexe: sexe,
-          photo: _profileImage?.path, // Ajouter le chemin de l'image
+          photo: _profileImage?.path, // Le chemin reste optionnel grâce au "?"
         );
-        // Suppression de l'image temporaire après l'inscription réussie
-        //await _profileImage!.delete();
 
-        // Envoi de l'image avec la requête d'inscription
         final success = await Provider.of<AuthProvider>(context, listen: false)
-            .register(user, _profileImage);
+            .register(user, _profileImage); // _profileImage peut être null
 
         if (success && mounted) {
           Navigator.pushNamed(

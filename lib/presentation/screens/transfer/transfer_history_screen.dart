@@ -168,11 +168,11 @@ class TransferHistoryScreen extends StatelessWidget {
               itemCount: state.transfers.length,
               itemBuilder: (context, index) {
                 final transfer = state.transfers[index];
-                return ListTile(
-                  title: Text('Montant : ${transfer['amount']}'),
-                  subtitle: Text('Date : ${transfer['date']}'),
-                  trailing: Text('Status : ${transfer['status']}'),
-                );
+                // return ListTile(
+                //   title: Text('Montant : ${transfer['amount']}'),
+                //   subtitle: Text('Date : ${transfer['date']}'),
+                //   trailing: Text('Status : ${transfer['status']}'),
+                // );
               },
             );
           } else if (state is TransferFailure) {

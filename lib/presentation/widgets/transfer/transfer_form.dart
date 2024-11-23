@@ -197,7 +197,7 @@ class _TransferFormState extends State<TransferForm> {
                           decoration: TransferFormStyles.getInputDecoration(
                             labelText: 'Numéro de téléphone',
                             icon: Icons.phone,
-                            hintText: 'Ex: 77123456',
+                            hintText: 'Ex: 77123456', suffixText: '',
                           ),
                           validator: _validatePhone,
                         ),
@@ -229,7 +229,7 @@ class _TransferFormState extends State<TransferForm> {
                     decoration: TransferFormStyles.getInputDecoration(
                       labelText: 'Montant',
                       icon: Icons.attach_money,
-                      hintText: '0.00 FCFA',
+                      hintText: '0.00 FCFA', suffixText: '',
                     ),
                     validator: _validateAmount,
                   ),

@@ -224,3 +224,40 @@ class Transfer {
     );
   }
 }
+
+
+enum TransactionType { sent, received, transfer }
+
+enum TransactionStatus { completed, pending, failed, cancelled }
+
+class Transaction {
+  final TransactionType type;
+  final double amount;
+  final String recipient;
+  final DateTime date;
+  final TransactionStatus status;
+
+  const Transaction({
+    required this.type,
+    required this.amount,
+    required this.recipient,
+    required this.date,
+    required this.status,
+  });
+
+  get montant => null;
+
+  get autreParte => null;
+
+  get typeOperation => null;
+
+  get typeLibelle => null;
+
+  get cancelledAt => null;
+
+  get cancelReason => null;
+
+  static fromJson(t) {}
+
+  static fromMap(map) {}
+}

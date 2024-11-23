@@ -5,8 +5,8 @@ import 'package:wave_app/services/dio_service.dart';
 
 class AuthRepository {
   late final Dio _dio;
-  static const String _baseUrl = 'http://192.168.1.95:3000/api';
-  //static const String _baseUrl = 'https://flutter-laravel-wave-app.onrender.com/api';
+  //static const String _baseUrl = 'http://192.168.6.82:3000/api';
+  static const String _baseUrl = 'https://flutter-laravel-wave-app.onrender.com/api';
 
 
   AuthRepository() {

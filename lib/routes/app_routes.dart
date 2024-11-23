@@ -4,7 +4,8 @@ import 'package:wave_app/presentation/screens/auth/otp-verification.dart';
 import 'package:wave_app/presentation/screens/auth/register_screen.dart';
 import 'package:wave_app/presentation/screens/auth/secret_code_setup_screen.dart';
 import 'package:wave_app/presentation/screens/auth/welcome_screen.dart';
-import 'package:wave_app/presentation/screens/home_screen.dart';
+import 'package:wave_app/presentation/screens/distributor_home_screen.dart';
+import 'package:wave_app/presentation/screens/home/home_screen.dart';
 import 'package:wave_app/presentation/screens/transfer/transfer_screen.dart';
 import 'package:wave_app/presentation/screens/transfer/merchant_scanner_screen.dart';
 import 'package:wave_app/presentation/screens/transfer/transfer_history_screen.dart';
@@ -20,6 +21,7 @@ class AppRoutes {
   static const String merchantScanner = '/merchant';
   static const String otpVerification = '/otp-verification';
   static const String secretCodeSetup = '/secret-code-setup';
+  static const String distributor = '/distributor';
 
   // Routes simples sans arguments
   static Map<String, WidgetBuilder> getSimpleRoutes() {
@@ -27,6 +29,7 @@ class AppRoutes {
       transfer: (context) => const TransferScreen(),
       transferHistory: (context) => const TransferHistoryScreen(),
       merchantScanner: (context) => const MerchantScannerScreen(),
+      distributor: (context) => const DistributorHomeScreen(),
     };
   }
 

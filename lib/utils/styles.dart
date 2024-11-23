@@ -5,7 +5,7 @@ class TransferFormStyles {
   static InputDecoration getInputDecoration({
     required String labelText,
     required IconData icon,
-    String? hintText, String? errorText,
+    String? hintText, String? errorText, required String suffixText,
   }) {
     return InputDecoration(
       labelText: labelText,

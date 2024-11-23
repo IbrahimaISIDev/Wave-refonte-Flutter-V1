@@ -19,6 +19,9 @@ class TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Créer une chaîne pour le nom complet du destinataire
+    String recipientName = '${transaction.autreParte.prenom} ${transaction.autreParte.nom}';
+    
     return Container(
       margin: const EdgeInsets.only(bottom: HomeScreenStyles.defaultSpacing),
       decoration: HomeScreenStyles.transactionItemDecoration,
@@ -32,7 +35,7 @@ class TransactionItem extends StatelessWidget {
               : HomeScreenStyles.receivedColor,
         ),
         title: Text(
-          transaction.recipient,
+          recipientName, // Utiliser le nom complet créé
           style: HomeScreenStyles.transactionTitleStyle,
         ),
         subtitle: Text(
@@ -40,9 +43,9 @@ class TransactionItem extends StatelessWidget {
           style: HomeScreenStyles.transactionSubtitleStyle,
         ),
         trailing: Text(
-          currencyFormat.format(transaction.amount),
+          currencyFormat.format(transaction.montant), // Utiliser montant au lieu de amount
           style: HomeScreenStyles.getTransactionAmountStyle(
-              transaction.type as bool),
+              transaction.isExpediteur), // Utiliser isExpediteur comme booléen
         ),
       ),
     );

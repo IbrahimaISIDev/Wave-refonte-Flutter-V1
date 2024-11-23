@@ -154,7 +154,7 @@ class _QRPaymentFormState extends State<QRPaymentForm> {
                     decoration: TransferFormStyles.getInputDecoration(
                       labelText: 'Montant',
                       icon: Icons.attach_money,
-                      hintText: '0.00 FCFA',
+                      hintText: '0.00 FCFA', suffixText: '',
                     ),
                     validator: _validateAmount,
                   ),

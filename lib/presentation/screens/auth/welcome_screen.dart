@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
-// Importez vos écrans
-
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Définir un style de bouton uniforme
+    final buttonStyle = ElevatedButton.styleFrom(
+      backgroundColor: Theme.of(context).primaryColor,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+    );
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -25,16 +33,15 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo animé sans effet de rotation, avec bords arrondis
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 1200),
                   builder: (context, double value, child) {
                     return Transform.scale(
-                      scale: value, // Animation de mise à l'échelle
+                      scale: value,
                       child: Hero(
                         tag: 'logo',
-                        child: ClipOval(  // Arrondir les bords du logo
+                        child: ClipOval(
                           child: Container(
                             decoration: BoxDecoration(
                               boxShadow: [
@@ -49,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
                               'assets/images/samaxaalis.jpeg',
                               width: 200,
                               height: 200,
-                              fit: BoxFit.cover,  // Assure que l'image couvre bien l'espace arrondi
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
@@ -59,7 +66,6 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
                 
-                // Texte de bienvenue avec animation
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 800),
@@ -92,7 +98,6 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 
-                // Boutons avec animation
                 TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 800),
@@ -109,25 +114,19 @@ class WelcomeScreen extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () => Navigator.pushNamed(context, '/login'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 48,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 2,
-                          shadowColor: Colors.black.withOpacity(0.1),
-                        ),
+                        style: buttonStyle,
                         child: const Text(
                           'Se connecter',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pushNamed(context, '/distributor'),
+                        style: buttonStyle,
+                        child: const Text(
+                          'Espace Distributeur',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -135,15 +134,9 @@ class WelcomeScreen extends StatelessWidget {
                         onPressed: () => Navigator.pushNamed(context, '/register'),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white.withOpacity(0.9),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 48,
-                            vertical: 16,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                         ),
-                        child: const Text(
-                          'Créer un compte',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                        child: const Text('Créer un compte', style: TextStyle(fontSize: 16)),
                       ),
                     ],
                   ),

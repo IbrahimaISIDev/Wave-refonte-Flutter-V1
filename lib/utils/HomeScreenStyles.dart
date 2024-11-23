@@ -140,6 +140,8 @@ class HomeScreenStyles {
   // ignore: prefer_typing_uninitialized_variables
   static var favoriteSubtitleStyle;
 
+  static var modalHeaderDecoration;
+
   // Additional Decorations
   static BoxDecoration get modalContainerDecoration => BoxDecoration(
         color: Colors.white,

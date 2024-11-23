@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_bloc.dart';
 import 'package:wave_app/bloc/auth/auth_event.dart';
 import 'package:wave_app/bloc/auth/auth_state.dart';
-import 'package:wave_app/presentation/screens/home_screen.dart';
+import 'package:wave_app/presentation/screens/home/home_screen.dart';
 import 'package:wave_app/utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {

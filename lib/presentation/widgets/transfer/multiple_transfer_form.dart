@@ -106,7 +106,7 @@ class _MultipleTransferFormState extends State<MultipleTransferForm> {
                     decoration: TransferFormStyles.getInputDecoration(
                       labelText: 'Numéros des bénéficiaires',
                       icon: Icons.group,
-                      hintText: 'Séparez les numéros par des virgules',
+                      hintText: 'Séparez les numéros par des virgules', suffixText: '',
                     ),
                     validator: _validateRecipients,
                     onSaved: (value) => _recipients =
@@ -118,7 +118,7 @@ class _MultipleTransferFormState extends State<MultipleTransferForm> {
                     decoration: TransferFormStyles.getInputDecoration(
                       labelText: 'Montant par personne',
                       icon: Icons.attach_money,
-                      hintText: '0.00 FCFA',
+                      hintText: '0.00 FCFA', suffixText: '',
                     ),
                     validator: _validateAmount,
                     onSaved: (value) => _amount = double.parse(value ?? '0'),

@@ -1,0 +1,284 @@
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Astou Fall KANE - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #000428 0%, #004e92 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .animate-card {
+            animation: cardFloat 3s ease-in-out infinite;
+        }
+
+        .glowing-border {
+            box-shadow: 0 0 20px #00ff9d;
+            animation: neonPulse 1.5s infinite;
+        }
+
+        .skill-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #00ff9d, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { box-shadow: 0 0 20px #00ff9d; }
+            50% { box-shadow: 0 0 30px #00ffff; }
+        }
+
+        .glass-effect {
+            background: rgba(2, 12, 27, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .shine-effect {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+        }
+
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255,255,255,0.2) 30%,
+                transparent 100%
+            );
+            transform: rotate(45deg);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .neon-highlight {
+            text-shadow: 0 0 5px #00ff9d, 0 0 10px #00ff9d;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #00ff9d;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main -->
+    <div class="max-w-2xl w-full glass-effect rounded-xl overflow-hidden animate-card glowing-border h-[52rem]">
+        <!-- Header -->
+        <div class="shine-effect p-4">
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <img alt="Profile" class="w-16 h-16 rounded-full border-2 border-[#00ff9d] shadow-lg object-cover" 
+                         src="moi.jpeg"/>
+                    <div class="absolute -bottom-1 -right-1 bg-[#00ff9d] w-3 h-3 rounded-full border-2"></div>
+                </div>
+                <div class="text-white">
+                    <h1 class="text-xl font-bold neon-highlight">Astou Fall KANE</h1>
+                    <p class="text-xs bg-black/30 rounded-full px-3 py-1 inline-block text-[#00ff9d]">
+                        <i class="fas fa-code-branch mr-1"></i>
+                        Développeuse Full Stack & Mobile
+                    </p>
+                       <p class="text-xs bg-black/30 rounded-full px-3 py-1 inline-block text-[#00ff9d]">
+            <i class="fas fa-graduation-cap mr-1"></i>
+            Génie Logiciel Bac +4/5
+        </p>
+                    <div class="flex flex-wrap gap-2 mt-2 text-xs">
+                        <span class="flex items-center gap-1 bg-black/30 rounded-full px-2 py-1">
+                            <i class="fas fa-map-marker-alt text-[#00ffff]"></i>
+                            <span>Dakar</span>
+                        </span>
+                        <span class="flex items-center gap-1 bg-black/30 rounded-full px-2 py-1">
+                            <i class="fas fa-phone text-[#00ffff]"></i>
+                            <span>77 359 34 71</span>
+                        </span>
+                        <span class="flex items-center gap-1 bg-black/30 rounded-full px-2 py-1">
+                            <i class="fas fa-envelope text-[#00ffff]"></i>
+                            <span>asfallkane@gmail.com</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4 overflow-y-auto custom-scrollbar h-[calc(100%-6rem)]">
+            <!-- About & Skills Grid -->
+            <div class="grid grid-cols-3 gap-3 mb-3">
+                <!-- About -->
+                <div class="col-span-1">
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <h2 class="text-sm font-semibold gradient-text mb-2">À propos</h2>
+                        <p class="text-xs text-gray-300">
+                            Développeuse passionnée avec expertise en création d'applications performantes et intuitives.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Skills Grid -->
+                <div class="col-span-2 grid grid-cols-2 gap-3">
+                    <!-- Frontend -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-code text-[#00ff9d] text-xs"></i>
+                            <h3 class="text-sm font-medium text-[#00ffff]">Frontend</h3>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">React.js / Node.js</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">TypeScript / Neon</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">HTML5 / CSS3</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Tailwind / SCSS</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">JavaScipt / Angular</div>
+                        </div>
+                    </div>
+
+                    <!-- Backend -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-server text-[#00ff9d] text-xs"></i>
+                            <h3 class="text-sm font-medium text-[#00ffff]">Backend</h3>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Node.js / Express</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">PHP POO / Laravel</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">API REST / GraphQL</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">MongoDB / MySQL</div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-mobile-alt text-[#00ff9d] text-xs"></i>
+                            <h3 class="text-sm font-medium text-[#00ffff]">Mobile</h3>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Flutter / Dart</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">GetX State Management</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Firebase Integration</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">RESTful APIs</div>
+                        </div>
+                    </div>
+
+                    <!-- Tools -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-tools text-[#00ff9d] text-xs"></i>
+                            <h3 class="text-sm font-medium text-[#00ffff]">Outils</h3>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Git / GitHub</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Docker / Render</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">Figma / Canva</div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">UI / Agile</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projets -->
+            <div>
+                <h2 class="text-sm font-semibold gradient-text mb-3">Réalisations Récentes</h2>
+                <div class="space-y-3">
+                    <!-- SocialV -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-project-diagram text-[#00ff9d] text-xs"></i>
+                                <h3 class="text-sm font-medium text-[#00ffff]">SocialV - Réseau Social des Tailleurs</h3>
+                            </div>
+                            <span class="text-xs text-gray-400">Oct. 2024</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2">
+                            Application web de type réseau social dédiée aux tailleurs et vendeurs d'articles de couture.
+                        </p>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">React.js</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Node.js</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">TypeScript</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Prisma</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Cloudinary</span>
+                        </div>
+                    </div>
+
+                    <!-- App Transfer -->
+                    <div class="skill-card bg-black/30 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-mobile-alt text-[#00ff9d] text-xs"></i>
+                                <h3 class="text-sm font-medium text-[#00ffff]">Application Mobile de Transfert d'Argent</h3>
+                            </div>
+                            <span class="text-xs text-gray-400">Nov. 2024</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2">
+                            Solution mobile pour les transferts d'argent avec QR code et notifications en temps réel.
+                        </p>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">
+                                <i class="fas fa-check text-[#00ff9d] mr-1"></i>
+                                Transferts simples et multiples
+                            </div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">
+                                <i class="fas fa-check text-[#00ff9d] mr-1"></i>
+                                QR code dynamique
+                            </div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">
+                                <i class="fas fa-check text-[#00ff9d] mr-1"></i>
+                                Notifications push
+                            </div>
+                            <div class="text-xs text-white bg-black/20 rounded px-2 py-1">
+                                <i class="fas fa-check text-[#00ff9d] mr-1"></i>
+                                Gestion sécurisée
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Flutter</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Laravel</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">Firebase</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">GetX</span>
+                            <span class="text-[10px] bg-black/20 text-[#00ff9d] rounded-full px-2 py-0.5">QR Code</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

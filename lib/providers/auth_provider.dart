@@ -123,7 +123,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Renvoi OTP
-  Future<bool> resendOtp() async {
+  Future<bool> resendOtp({required String phoneNumber}) async {
     if (_verificationPhone == null) {
       _setError('Numéro de téléphone non disponible');
       print('Erreur : Numéro de téléphone non disponible');
@@ -195,3 +195,145 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 }
+
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:wave_app/data/models/user_model.dart';
+// import 'package:wave_app/services/auth_service.dart';
+
+// class AuthProvider extends ChangeNotifier {
+//   final ServiceAuth _authService;
+//   bool _isLoading = false;
+//   String? _error;
+//   Map<String, dynamic>? _userData;
+//   String? _verificationPhone;
+
+//   AuthProvider({ServiceAuth? authService})
+//       : _authService = authService ?? ServiceAuth();
+
+//   bool get isLoading => _isLoading;
+//   String? get error => _error;
+//   Map<String, dynamic>? get userData => _userData;
+
+//   // Méthodes utilitaires
+//   void _setLoading(bool value) {
+//     _isLoading = value;
+//     notifyListeners();
+//   }
+
+//   void _setError(String? value) {
+//     _error = value;
+//     notifyListeners();
+//   }
+
+//   // Inscription
+//   Future<bool> register(UserModel user, {File? profileImage}) async {
+//     _setLoading(true);
+//     _setError(null);
+
+//     try {
+//       final response = await _authService.inscription(
+//         nom: user.nom,
+//         prenom: user.prenom,
+//         telephone: user.telephone,
+//         email: user.email,
+//         adresse: user.adresse,
+//         dateNaissance: user.dateNaissance,
+//         sexe: user.sexe,
+//         photo: profileImage?.path,
+//       );
+
+//       _userData = response;
+//       _verificationPhone = user.telephone;
+
+//       print('Inscription réussie pour ${user.nom} ${user.prenom}');
+//       return true;
+//     } catch (e) {
+//       _setError('Erreur d\'inscription : $e');
+//       print(_error);
+//       return false;
+//     } finally {
+//       _setLoading(false);
+//     }
+//   }
+
+//   // Vérification OTP
+//   Future<bool> verifyOtp(String code) async {
+//     if (_verificationPhone == null) {
+//       _setError('Numéro de téléphone non défini.');
+//       return false;
+//     }
+
+//     _setLoading(true);
+//     _setError(null);
+
+//     try {
+//       final response = await _authService.verifyOtp(
+//         phone: _verificationPhone!,
+//         code: code,
+//       );
+
+//       _userData?.addAll(response);
+//       print('Vérification OTP réussie pour $_verificationPhone');
+//       return true;
+//     } catch (e) {
+//       _setError('Erreur lors de la vérification OTP : $e');
+//       print(_error);
+//       return false;
+//     } finally {
+//       _setLoading(false);
+//     }
+//   }
+
+//   // Configuration du code secret
+//   Future<bool> setupSecretCode(String secretCode) async {
+//     if (_verificationPhone == null) {
+//       _setError('Numéro de téléphone non défini.');
+//       return false;
+//     }
+
+//     _setLoading(true);
+//     _setError(null);
+
+//     try {
+//       final response = await _authService.setupSecretCode(
+//         phone: _verificationPhone!,
+//         secretCode: secretCode,
+//       );
+
+//       _userData?.addAll(response);
+//       print('Code secret configuré avec succès pour $_verificationPhone');
+//       return true;
+//     } catch (e) {
+//       _setError('Erreur de configuration du code secret : $e');
+//       print(_error);
+//       return false;
+//     } finally {
+//       _setLoading(false);
+//     }
+//   }
+
+//   // Renvoi du code OTP
+//   Future<bool> resendOtp() async {
+//     if (_verificationPhone == null) {
+//       _setError('Numéro de téléphone non défini.');
+//       return false;
+//     }
+
+//     _setLoading(true);
+//     _setError(null);
+
+//     try {
+//       await _authService.resendOtp(phone: _verificationPhone!);
+//       print('Code OTP renvoyé avec succès pour $_verificationPhone');
+//       return true;
+//     } catch (e) {
+//       _setError('Erreur lors du renvoi OTP : $e');
+//       print(_error);
+//       return false;
+//     } finally {
+//       _setLoading(false);
+//     }
+//   }
+// }
+

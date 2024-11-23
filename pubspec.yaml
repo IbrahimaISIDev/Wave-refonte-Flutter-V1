@@ -67,7 +67,6 @@ flutter:
   
   assets:
     - assets/images/samaxaalis.jpeg    
-    - assets/images/logo_wave.png
     - assets/fonts/
 
   fonts:
